@@ -55,15 +55,15 @@
             <thead>
                 <tr>
                     @*<th field="VILLAGE_NAME" width="80" align="center">小区名称</th>
-                    <th field="VILLAGE_ADDRESS" width="100" align="center">地址</th>
-                    <th field="VILLAGE_REGION" width="80" align="center">区域</th>
-                    <th field="VILLAGE_TYPE" width="80" align="center">类型</th>
-                    <th field="VILLAGE_COUNT" width="80" align="center">楼宇数</th>
-                    <th field="VILLAGE_hasBounds" width="80" align="center">边界</th>
-                    <th field="VILLAGE_ACTION" width="80" align="center">操作</th>
-                    <th field="VILLAGE_ID" align="center" hidden="true">village_id</th>
-                    <th field="VILLAGE_LNG" align="center" hidden="true">经度</th>
-                    <th field="VILLAGE_LAT" align="center" hidden="true">纬度</th>*@
+                        <th field="VILLAGE_ADDRESS" width="100" align="center">地址</th>
+                        <th field="VILLAGE_REGION" width="80" align="center">区域</th>
+                        <th field="VILLAGE_TYPE" width="80" align="center">类型</th>
+                        <th field="VILLAGE_COUNT" width="80" align="center">楼宇数</th>
+                        <th field="VILLAGE_hasBounds" width="80" align="center">边界</th>
+                        <th field="VILLAGE_ACTION" width="80" align="center">操作</th>
+                        <th field="VILLAGE_ID" align="center" hidden="true">village_id</th>
+                        <th field="VILLAGE_LNG" align="center" hidden="true">经度</th>
+                        <th field="VILLAGE_LAT" align="center" hidden="true">纬度</th>*@
                 </tr>
             </thead>
         </table>
@@ -73,15 +73,15 @@
             <thead>
                 <tr>
                     @*<th field="BUILDING_NAME" width="80" align="center">楼宇号</th>
-                    <th field="building_address" width="100" align="center">详细地址（蓝牌地址码)</th>
-                    <th field="building_action" width="80" align="center">操作</th>*@
+                        <th field="building_address" width="100" align="center">详细地址（蓝牌地址码)</th>
+                        <th field="building_action" width="80" align="center">操作</th>*@
                 </tr>
             </thead>
         </table>
 
     </div>
 
-  
+
     <div class="c">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -157,109 +157,116 @@
         });
 
 
-    $("#dg").datagrid({
-        columns: [[
-            { field: "VILLAGE_NAME", title:"小区名称", width:80, align:"center" },
-            { field: "VILLAGE_ADDRESS", title:"地址", width:80, align:"center" },
-            { field: "VILLAGE_REGION", title:"区域", width:80, align:"center" },
-            { field: "VILLAGE_TYPE", title:"类型", width:80, align:"center" },
-            { field: "VILLAGE_COUNT", title:"楼宇数", width:80, align:"center" },
-            { field: "VILLAGE_HASBOUNDS", title:"边界", width:80, align:"center", formatter: function(value,row,index){
-                if (row.VILLAGE_BOUNDS !== null) {
-                    return "有";
-                } else {
-                    return "无";
-                }
-            }
-            },
-            { field: "VILLAGE_ACTION", title:"操作", width:80, align:"center",  formatter: function(value,row,index){
-				return `<i class="fa fa-eye mr-5" data-lng="${row.VILLAGE_LNG}" data-lat="${row.VILLAGE_LAT}" data-bounds="${row.VILLAGE_BOUNDS}" data-guid="${row.VILLAGE_ID}" onclick="getPoiDetail(this);"></i><i class="fa fa-edit mr-5" data-guid="${row.VILLAGE_ID}" onclick="editPoi(this);"></i><i class="fa fa-trash-o" data-guid="${row.VILLAGE_ID}" onclick="deletePoi(this);"></i>`;
-			}},
-	]]
-    });
+        $("#dg").datagrid({
+            columns: [[
+                { field: "VILLAGE_NAME", title: "小区名称", width: 80, align: "center" },
+                { field: "VILLAGE_ADDRESS", title: "地址", width: 80, align: "center" },
+                { field: "VILLAGE_REGION", title: "区域", width: 80, align: "center" },
+                { field: "VILLAGE_TYPE", title: "类型", width: 80, align: "center" },
+                { field: "VILLAGE_COUNT", title: "楼宇数", width: 80, align: "center" },
+                {
+                    field: "VILLAGE_HASBOUNDS", title: "边界", width: 80, align: "center", formatter: function (value, row, index) {
+                        if (row.VILLAGE_BOUNDS !== null) {
+                            return "有";
+                        } else {
+                            return "无";
+                        }
+                    }
+                },
+                {
+                    field: "VILLAGE_ACTION", title: "操作", width: 80, align: "center", formatter: function (value, row, index) {
+                        return `<i class="fa fa-eye mr-5" data-lng="${row.VILLAGE_LNG}" data-lat="${row.VILLAGE_LAT}" data-bounds="${row.VILLAGE_BOUNDS}" data-guid="${row.VILLAGE_ID}" onclick="getPoiDetail(this);"></i><i class="fa fa-edit mr-5" data-guid="${row.VILLAGE_ID}" onclick="editPoi(this);"></i><i class="fa fa-trash-o" data-guid="${row.VILLAGE_ID}" onclick="deletePoi(this);"></i>`;
+                    }
+                },
+            ]]
+        });
 
         $("#dg2").datagrid({
-        columns: [[
-            { field: "BUILDING_NAME", title:"楼宇号", width:80, align:"center" },
-            { field: "BUILDING_ADDRESS", title:"详细地址（蓝牌地址码)", width:80, align:"center" },
-            {
-                field: "BUILDING_ACTION", title: "操作", width: 80, align: "center", formatter: function (value, row, index) {
+            columns: [[
+                { field: "BUILDING_NAME", title: "楼宇号", width: 80, align: "center" },
+                { field: "BUILDING_ADDRESS", title: "详细地址（蓝牌地址码)", width: 80, align: "center" },
+                {
+                    field: "BUILDING_ACTION", title: "操作", width: 80, align: "center", formatter: function (value, row, index) {
 
-                    return `<i class=\"fa fa-eye mr-5 \" data-lng="${row.LNG}" data-lat="${row.LAT}" data-guid="${row.BUILDING_ID}" onclick="getPoiDetail2(this);"></i><i class=\"fa fa-edit mr-5 \" data-guid="${row.BUILDING_ID}" onclick="editPoi2(this);"></i><i class=\"fa fa-trash-o \" data-guid="${row.BUILDING_ID}" onclick="deletePoi2(this);"></i>`;
+                        return `<i class=\"fa fa-eye mr-5 \" data-lng="${row.LNG}" data-lat="${row.LAT}" data-guid="${row.BUILDING_ID}" onclick="getPoiDetail2(this);"></i><i class=\"fa fa-edit mr-5 \" data-guid="${row.BUILDING_ID}" onclick="editPoi2(this);"></i><i class=\"fa fa-trash-o \" data-guid="${row.BUILDING_ID}" onclick="deletePoi2(this);"></i>`;
+                    }
                 }
+            ]]
+        });
+
+        $('.datagrid-pager.pagination').pagination({
+            displayMsg: "显示 {total} 条 中 {from} 到 {to} 条"
+        });
+
+        $('#dg').datagrid({
+            onClickRow: function (index, field, value) {
+                console.log(field);
+                console.log(value);
+                map.clearMap();
+                map.setZoom(18);
+                map.setCenter([field.VILLAGE_LNG, field.VILLAGE_LAT]);
+                if (field.VILLAGE_BOUNDS !== null) {
+                    var polygon = new AMap.Polygon({
+                        strokeColor: "#2828FF",
+                        fillOpacity: 0,
+                        bubble: true,
+                        strokeWeight: 1,
+                        path: JSON.parse(field.VILLAGE_BOUNDS),
+                        map: map
+                    });
+                    var polylineEditor = new AMap.PolyEditor(map, polygon);
+                    polygon.setExtData({ "editor": polylineEditor });
+                }
+                if (field.VILLAGE_COUNT !== 0) {
+                    $.ajax({
+                        type: "get",
+                        url: `./API/GetBuildings?villageid=${field.VILLAGE_ID}`,
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (data) {
+                            data.ds.forEach(function (building) {
+                                var icon = new AMap.Icon({
+                                    size: new AMap.Size(15, 15),
+                                    image: './icons/circle.png',  // Icon的图像
+                                    imageSize: new AMap.Size(15, 15)
+                                });
+                                var marker = new AMap.Marker({
+                                    position: new AMap.LngLat(building.LNG, building.LAT),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+                                    title: building.BUILDING_NAME,
+                                    icon: icon // 添加 Icon 图标 URL
+                                });
+                                map.add(marker);
+                            });
+
+                        },
+                        error: function (item, err) {
+                            console.log(err);
+                        }
+                    });
+                    // get related buildings and
+                    // use data to draw markers
+                }
+                $("#dg2").datagrid({
+                    url: `./API/GetBuildingsPaginated?villageid=${field.VILLAGE_ID}`,
+                    method: 'get',
+                    onLoadSuccess: function (data) {
+
+                        //$("#dg").datagrid('selectRow',0);
+                    }
+                });
+
+
             }
-	]]
-    });
+        });
 
-                        $('#dg').datagrid({
-                            onClickRow: function (index, field, value) {
-                                console.log(field);
-                                console.log(value);
-                                map.clearMap();
-                                map.setZoom(18);
-                                map.setCenter([field.VILLAGE_LNG, field.VILLAGE_LAT]);
-                                if (field.VILLAGE_BOUNDS !== null) {
-                                     var polygon = new AMap.Polygon({
-                                            strokeColor: "#2828FF",
-                                            fillOpacity: 0,
-                                            bubble: true,
-                                            strokeWeight: 1,
-                                            path: JSON.parse(field.VILLAGE_BOUNDS),
-                                            map: map
-                                        });
-                                      var polylineEditor = new AMap.PolyEditor(map, polygon);
-                                      polygon.setExtData({ "editor": polylineEditor });
-                                }
-                                if (field.VILLAGE_COUNT !== 0) {
-                                            $.ajax({
-                                                type: "get",
-                                                url: `./API/GetBuildings?villageid=${field.VILLAGE_ID}`,
-                                                contentType: "application/json; charset=utf-8",
-                                                dataType: "json",
-                                                success: function (data) {
-                                                    data.ds.forEach(function (building) {
-                                                        var icon = new AMap.Icon({
-                                        size: new AMap.Size(15, 15),
-                                        image: './icons/circle.png',  // Icon的图像
-                                        imageSize: new AMap.Size(15, 15)
-                                    });
-                                                        var marker = new AMap.Marker({
-                                                            position: new AMap.LngLat(building.LNG, building.LAT),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-                                                            title: building.BUILDING_NAME,
-                                                            icon: icon // 添加 Icon 图标 URL
-                                                        });
-                                                        map.add(marker);
-                                                    });
-                        
-                                            },
-                                            error: function (item, err) {
-                                                console.log(err);
-                                            }
-                                            });
-                                    // get related buildings and 
-                                    // use data to draw markers
-                                }
-                                    $("#dg2").datagrid({
-                            url: `./API/GetBuildingsPaginated?villageid=${field.VILLAGE_ID}`,
-                            method: 'get',
-                            onLoadSuccess: function (data) {
-                               
-                                //$("#dg").datagrid('selectRow',0);
-                            }
-                        });
+        $('#dg2').datagrid({
+            onClickRow: function (index, field, value) {
+                map.setZoom(18);
+                map.setCenter([field.LNG, field.LAT]);
 
-                           
-	}
-                        });
+            }
+        });
 
-    $('#dg2').datagrid({
-        onClickRow: function (index, field, value) {
-            map.setZoom(18);
-            map.setCenter([field.LNG, field.LAT]);
-
-        }
-    });
-         
         function getBuildingNumber(str) {
             var r = str.match(/[a-zA-Z]/);
             if (r !== null) {
@@ -452,7 +459,7 @@
                     }
                 });
             }
-    }
+        }
 
         function getVillage(e) {
             var selectP = document.getElementById('selectProvince');
@@ -581,7 +588,7 @@
                     }
                 });
             }
-    }
+        }
 
         function drawPolygon() {
             mousetool.polygon({
@@ -1772,16 +1779,16 @@
             var region = province + "/" + city + "/" + county;
 
             if (province !== "所有" && city !== "所有" && county !== "所有") {
-                      map.clearMap();
-                        $("#dg").datagrid({
-                            url: `./API/SearchByRegion?text=${textSearch}&region=${region}`,
-                            method: 'get',
-                            onLoadSuccess: function (data) {
-                                 document.getElementsByClassName('datagrid-row')[0].click();
-                            }
-                        });
+                map.clearMap();
+                $("#dg").datagrid({
+                    url: `./API/SearchByRegion?text=${textSearch}&region=${region}`,
+                    method: 'get',
+                    onLoadSuccess: function (data) {
+                        document.getElementsByClassName('datagrid-row')[0].click();
+                    }
+                });
             } else if (province !== "所有" && city !== "所有" && county === "所有") {
-                                      map.clearMap();
+                map.clearMap();
                 $("#dg").datagrid({
                     url: `./api/SearchByCity?text=${textSearch}&city=${city}`,
                     method: 'get',
@@ -1790,75 +1797,75 @@
                     }
                 });
             }
-    }
-                   //$.ajax({
-                //    type: "get",
-                //    url: `./API/SearchVillageByCity?text=${textSearch}&city=${city}`,
-                //    contentType: "application/json; charset=utf-8",
-                //    dataType: "json",
-                //    success: function (data) {
-                //        var xq = data["ds"];
-                //        var rowsXQ = [];
-                //        xq.forEach(function (XQ) {
+        }
+        //$.ajax({
+        //    type: "get",
+        //    url: `./API/SearchVillageByCity?text=${textSearch}&city=${city}`,
+        //    contentType: "application/json; charset=utf-8",
+        //    dataType: "json",
+        //    success: function (data) {
+        //        var xq = data["ds"];
+        //        var rowsXQ = [];
+        //        xq.forEach(function (XQ) {
 
 
-                //            var hasBounds = "无";
-                //            if (XQ["VILLAGE_BOUNDS"] !== null) {
-                //                hasBounds = "有";
-                //            }
-                //            rowsXQ.push({ village_name: XQ["VILLAGE_NAME"], village_address: XQ["VILLAGE_ADDRESS"], village_region: XQ["VILLAGE_REGION"], village_type: XQ["VILLAGE_TYPE"], village_count: XQ["VILLAGE_COUNT"], village_hasBounds: hasBounds, village_action: `<i class="fa fa-eye mr-5" data-lng="${XQ["VILLAGE_LNG"]}" data-lat="${XQ["VILLAGE_LAT"]}" data-bounds="${XQ["VILLAGE_BOUNDS"]}" data-guid="${XQ["VILLAGE_ID"]}" onclick="getPoiDetail(this);"></i><i class="fa fa-edit mr-5" data-guid="${XQ["VILLAGE_ID"]}" onclick="editPoi(this);"></i><i class="fa fa-trash-o" data-guid="${XQ["VILLAGE_ID"]}" onclick="deletePoi(this);"></i>`, village_lng: XQ["VILLAGE_LNG"], village_lat: XQ["VILLAGE_LAT"] });
-                //        });
-                //        $('#dg').datagrid('loadData', getData(rowsXQ));
-                //    },
-                //    error: function (item, err) {
-                //        console.log(err);
-                //    }
-                //});
-               //$.ajax({
-                //    type: "get",
-                //    url: `./API/SearchVillage?text=${textSearch}&region=${region}`,
-                //    contentType: "application/json; charset=utf-8",
-                //    dataType: "json",
-                //    success: function (data) {
-                //        var xq = data["ds"];
-                //        var rowsXQ = [];
-                //        xq.forEach(function (XQ) {
+        //            var hasBounds = "无";
+        //            if (XQ["VILLAGE_BOUNDS"] !== null) {
+        //                hasBounds = "有";
+        //            }
+        //            rowsXQ.push({ village_name: XQ["VILLAGE_NAME"], village_address: XQ["VILLAGE_ADDRESS"], village_region: XQ["VILLAGE_REGION"], village_type: XQ["VILLAGE_TYPE"], village_count: XQ["VILLAGE_COUNT"], village_hasBounds: hasBounds, village_action: `<i class="fa fa-eye mr-5" data-lng="${XQ["VILLAGE_LNG"]}" data-lat="${XQ["VILLAGE_LAT"]}" data-bounds="${XQ["VILLAGE_BOUNDS"]}" data-guid="${XQ["VILLAGE_ID"]}" onclick="getPoiDetail(this);"></i><i class="fa fa-edit mr-5" data-guid="${XQ["VILLAGE_ID"]}" onclick="editPoi(this);"></i><i class="fa fa-trash-o" data-guid="${XQ["VILLAGE_ID"]}" onclick="deletePoi(this);"></i>`, village_lng: XQ["VILLAGE_LNG"], village_lat: XQ["VILLAGE_LAT"] });
+        //        });
+        //        $('#dg').datagrid('loadData', getData(rowsXQ));
+        //    },
+        //    error: function (item, err) {
+        //        console.log(err);
+        //    }
+        //});
+        //$.ajax({
+        //    type: "get",
+        //    url: `./API/SearchVillage?text=${textSearch}&region=${region}`,
+        //    contentType: "application/json; charset=utf-8",
+        //    dataType: "json",
+        //    success: function (data) {
+        //        var xq = data["ds"];
+        //        var rowsXQ = [];
+        //        xq.forEach(function (XQ) {
 
-                //            var hasBounds = "无";
-                //            if (XQ["VILLAGE_BOUNDS"] !== null) {
-                //                hasBounds = "有";
-                //            }
-                //            rowsXQ.push({ village_name: XQ["VILLAGE_NAME"], village_address: XQ["VILLAGE_ADDRESS"], village_region: XQ["VILLAGE_REGION"], village_type: XQ["VILLAGE_TYPE"], village_count: XQ["VILLAGE_COUNT"], village_hasBounds: hasBounds, village_action: `<i class="fa fa-eye mr-5" data-lng="${XQ["VILLAGE_LNG"]}" data-lat="${XQ["VILLAGE_LAT"]}" data-bounds="${XQ["VILLAGE_BOUNDS"]}" data-guid="${XQ["VILLAGE_ID"]}" onclick="getPoiDetail(this);"></i><i class="fa fa-edit mr-5" data-guid="${XQ["VILLAGE_ID"]}" onclick="editPoi(this);"></i><i class="fa fa-trash-o" data-guid="${XQ["VILLAGE_ID"]}" onclick="deletePoi(this);"></i>`, village_lng: XQ["VILLAGE_LNG"], village_lat: XQ["VILLAGE_LAT"] });
-                //        });
-                //        $('#dg').datagrid('loadData', getData(rowsXQ));
-                //    },
-                //    error: function (item, err) {
-                //        console.log(err);
-                //    }
-                //});
-    function searchBuilding(e) {
-                 var textSearch = e.previousSibling.value;
+        //            var hasBounds = "无";
+        //            if (XQ["VILLAGE_BOUNDS"] !== null) {
+        //                hasBounds = "有";
+        //            }
+        //            rowsXQ.push({ village_name: XQ["VILLAGE_NAME"], village_address: XQ["VILLAGE_ADDRESS"], village_region: XQ["VILLAGE_REGION"], village_type: XQ["VILLAGE_TYPE"], village_count: XQ["VILLAGE_COUNT"], village_hasBounds: hasBounds, village_action: `<i class="fa fa-eye mr-5" data-lng="${XQ["VILLAGE_LNG"]}" data-lat="${XQ["VILLAGE_LAT"]}" data-bounds="${XQ["VILLAGE_BOUNDS"]}" data-guid="${XQ["VILLAGE_ID"]}" onclick="getPoiDetail(this);"></i><i class="fa fa-edit mr-5" data-guid="${XQ["VILLAGE_ID"]}" onclick="editPoi(this);"></i><i class="fa fa-trash-o" data-guid="${XQ["VILLAGE_ID"]}" onclick="deletePoi(this);"></i>`, village_lng: XQ["VILLAGE_LNG"], village_lat: XQ["VILLAGE_LAT"] });
+        //        });
+        //        $('#dg').datagrid('loadData', getData(rowsXQ));
+        //    },
+        //    error: function (item, err) {
+        //        console.log(err);
+        //    }
+        //});
+        function searchBuilding(e) {
+            var textSearch = e.previousSibling.value;
             var province = $("#selectProvince").find("option:selected").text();
             var city = $("#selectCity").find("option:selected").text();
             var county = $("#selectCounty").find("option:selected").text();
             var region = province + "/" + city + "/" + county;
             if (province !== "所有" && city !== "所有" && county !== "所有") {
-                      map.clearMap();
-                        $("#dg2").datagrid({
-                            url: `./API/SearchByRegionBuildings?text=${textSearch}&region=${region}`,
-                            method: 'get',
-                            onLoadSuccess: function (data) {
-                            }
-                        });
+                map.clearMap();
+                $("#dg2").datagrid({
+                    url: `./API/SearchByRegionBuildings?text=${textSearch}&region=${region}`,
+                    method: 'get',
+                    onLoadSuccess: function (data) {
+                    }
+                });
             } else if (province !== "所有" && city !== "所有" && county === "所有") {
-                                      map.clearMap();
+                map.clearMap();
                 $("#dg2").datagrid({
                     url: `./API/SearchByCityBuildings?text=${textSearch}&city=${city}`,
                     method: 'get',
                     onLoadSuccess: function (data) {
                     }
                 });
-        }
+            }
 
             //var textSearch = e.previousSibling.value;
             ////if (textSearch.length === 0) {
@@ -2027,14 +2034,14 @@
                             url: `./api/IndexByCity?city=${city}`,
                             method: 'get',
                             onLoadSuccess: function (data) {
-                                 document.getElementsByClassName('datagrid-row')[0].click();
+                                document.getElementsByClassName('datagrid-row')[0].click();
                             }
                         });
                         // by default click on first row
-                       
-                        
-                        
-                  
+
+
+
+
                     }
 
 
@@ -2052,7 +2059,7 @@
                             url: `./API/IndexByRegion?region=${region}`,
                             method: 'get',
                             onLoadSuccess: function (data) {
-                                 document.getElementsByClassName('datagrid-row')[0].click();
+                                document.getElementsByClassName('datagrid-row')[0].click();
                             }
                         });
 
@@ -2142,7 +2149,7 @@
                             url: `./api/IndexByCity?city=${city}`,
                             method: 'get',
                             onLoadSuccess: function (data) {
-                                 document.getElementsByClassName('datagrid-row')[0].click();
+                                document.getElementsByClassName('datagrid-row')[0].click();
                             }
                         });
 
@@ -2240,16 +2247,16 @@
 
 
 
-       // createTables();
+        // createTables();
         setTimeout(function () {
             document.getElementsByClassName('panel-body-noheader')[0].classList.add("w-100p");
             var container = document.createElement('div');
             container.setAttribute("id", "buttonOpenClose");
             container.innerHTML += `<span class="bb-lightblue pb-5px mr-20">是否显示小区边界</span><button type="button" class="layui-btn layui-btn-radius layui-btn-normal layui-btn-sm" onclick="openPois(this);" disabled>是 <i class="fa fa-check ml-3px"></i></button><button type="button" class="layui-btn layui-btn-primary layui-btn-radius layui-btn-sm" onclick="closePois(this);">否</button>`;
             document.getElementsByClassName('panel')[1].appendChild(container);
- },5000)
+        }, 5000)
     </script>
-
+    <script type="text/javascript" src="~/easyui/locale/easyui-lang-zh_CN.js"></script>
 
 
 </body>

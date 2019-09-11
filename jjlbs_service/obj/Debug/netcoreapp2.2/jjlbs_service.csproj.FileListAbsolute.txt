@@ -215,7 +215,6 @@ C:\Users\Administrator\source\repos\jjlbs_serviceNewV2\jjlbs_service\obj\Debug\n
 C:\Users\Administrator\source\repos\jjlbs_serviceNewV2\jjlbs_service\obj\Debug\netcoreapp2.2\jjlbs_service.pdb
 C:\Users\Administrator\source\repos\jjlbs_serviceNewV2\jjlbs_service\obj\Debug\netcoreapp2.2\jjlbs_service.csproj.CopyComplete
 C:\Users\Administrator\source\repos\jjlbs_serviceNewV2\jjlbs_service\obj\Debug\netcoreapp2.2\Razor\Views\Shared\_LayoutNew.g.cshtml.cs
-C:\Users\Administrator\source\repos\jjlbs_serviceNewV2\jjlbs_service\obj\Debug\netcoreapp2.2\jjlbs_service.csprojAssemblyReference.cache
 C:\Users\mac\Desktop\jjlbs_serviceNewV2\jjlbs_service\bin\Debug\netcoreapp2.2\jjlbs_service.deps.json
 C:\Users\mac\Desktop\jjlbs_serviceNewV2\jjlbs_service\bin\Debug\netcoreapp2.2\jjlbs_service.runtimeconfig.json
 C:\Users\mac\Desktop\jjlbs_serviceNewV2\jjlbs_service\bin\Debug\netcoreapp2.2\jjlbs_service.runtimeconfig.dev.json
