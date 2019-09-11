@@ -247,3 +247,4 @@ C:\Users\mac\Desktop\jjlbs_serviceNewV2\jjlbs_service\obj\Debug\netcoreapp2.2\jj
 C:\Users\mac\Desktop\jjlbs_serviceNewV2\jjlbs_service\obj\Debug\netcoreapp2.2\jjlbs_service.pdb
 C:\Users\mac\Desktop\jjlbs_serviceNewV2\jjlbs_service\obj\Debug\netcoreapp2.2\jjlbs_service.csproj.CopyComplete
 C:\Users\mac\Desktop\jjlbs_serviceNewV2\jjlbs_service\obj\Debug\netcoreapp2.2\jjlbs_service.csprojAssemblyReference.cache
+C:\Users\Administrator\source\repos\jjlbs_serviceNewV2\jjlbs_service\obj\Debug\netcoreapp2.2\jjlbs_service.csprojAssemblyReference.cache

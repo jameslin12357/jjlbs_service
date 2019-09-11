@@ -790,7 +790,7 @@ namespace jjlbs_service.Controllers
             else
             {
                 Oraclehp ohp = new Oraclehp();
-                DataSet data = ohp.Query($"begin insert into lbs_village (village_name, village_address, village_region, village_type, village_bounds, village_x, village_y, village_lng, village_lat, source) values ('{village_name}','{village_address}','{village_region}','{village_type}', '{village_bounds}','{village_x}','{village_y}','{village_lat}','{village_lng}','{source}');commit;end;");
+                DataSet data = ohp.Query($"begin insert into lbs_village (village_name, village_address, village_region, village_type, village_bounds, village_x, village_y, village_lng, village_lat, source) values ('{village_name}','{village_address}','{village_region}','{village_type}', '{village_bounds}','{village_x}','{village_y}','{village_lng}','{village_lat}','{source}');commit;end;");
                 return "[]";
             }
         }
