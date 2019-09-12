@@ -5,6 +5,13 @@
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="wwwroot\新文件夹\**" />
+    <Content Remove="wwwroot\新文件夹\**" />
+    <EmbeddedResource Remove="wwwroot\新文件夹\**" />
+    <None Remove="wwwroot\新文件夹\**" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />

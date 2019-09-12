@@ -56,8 +56,8 @@
     height: 40%;
 }
 
-.mr-5 {
-    margin-right: 5px;
+.mr-10px {
+    margin-right: 10px;
 }
 
 .mr-10 {
@@ -76,6 +76,9 @@
     margin-right: 20px;
 }
 
+.mr-5 {
+    margin-right: 5px;
+}
 
 .mb-10 {
     margin-bottom: 10px;
@@ -87,6 +90,10 @@
 
 .mb-10 {
     margin-bottom: 10px;
+}
+
+.mr-10p {
+    margin-right: 10%;
 }
 
 .aic {
@@ -182,10 +189,14 @@ i.fa{
 #logo {
     font-size: 25px;
     font-weight: bold;
+    letter-spacing: 1px;
 }
 
 .selectPCC {
-    padding: 10px;
+    text-align-last: center;
+    font-weight: bold;
+    font-size: 20px;
+    padding: 15px;
     border: none;
 }
 
@@ -221,4 +232,23 @@ select::-ms-expand {
 
 #poiDetail {
     right: 20px;
+}
+
+#menuiconNav {
+    width: 15px;
+    height: 15px;
+}
+
+.pd-15100 {
+    padding: 15px 100px 15px 100px;
+}
+
+select {
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+}
+
+.fs20{
+    font-size: 20px;
 }

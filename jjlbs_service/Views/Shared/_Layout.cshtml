@@ -23,19 +23,25 @@
     </style>
 </head>
 <body>
-    <div id="header" class="flex sb pd-20 bb-lightblue">
-        <div id="logo">
+    <div id="header" class="flex pd-20 bb-lightblue aic">
+        <div id="logo" class="mr-10px">
             JJLBS-SERVICE
         </div>
-        <div id="selectFilter">
-            <select id="selectProvince" class="selectPCC"><option value="">所有</option></select>
-            <select id="selectCity" class="selectPCC"><option value="">所有</option></select>
-            <select id="selectCounty" class="selectPCC"><option value="">所有</option></select>
+        <div class="mr-10px">
+            <img id="menuiconNav" src="/img/menu.png" />
         </div>
-        <div class="tabsMain">
+        <div class="pd-15100 bb-lightblue mr-10p bold">
+            五级地址码
+        </div>
+        <div id="selectFilter">
+            <select id="selectProvince" class="selectPCC"><option value="">全部</option></select><span class="fs20">/</span>
+            <select id="selectCity" class="selectPCC"><option value="">全部</option></select><span class="fs20">/</span>
+            <select id="selectCounty" class="selectPCC"><option value="">全部</option></select>
+        </div>
+        @*<div class="tabsMain">
             <button type="button" class="layui-btn layui-btn-primary layui-btn-radius selectedButton tabBorderLeft bd0">高德地图</button>
             <button type="button" class="layui-btn layui-btn-primary layui-btn-radius tabBorderRight m0 bd0">ARCGIS</button>
-        </div>
+        </div>*@
     </div>
     <div id="footer" class="flex">
         <div id="tb" class="flex sb aic" style="padding: 10px;">
@@ -85,7 +91,7 @@
                 </tr>
             </thead>
         </table>
-        <table id="dg2" class="easyui-datagrid" style="width:35%;height:100%" iconcls="icon-save" rownumbers="true" pagination="true" data-options="fitColumns:true,rownumbers:false,singleSelect:true,pagination:true,toolbar:tb2,loadMsg:'数据加载中'">
+        <table id="dg2" class="easyui-datagrid" style="width:35%;height:100%" iconcls="icon-save" pagination="true" data-options="fitColumns:true,rownumbers:false,singleSelect:true,pagination:true,toolbar:tb2,loadMsg:'数据加载中'">
             <thead>
                 <tr>
                     @*
@@ -185,7 +191,8 @@
         $("#dg2").datagrid({
             columns: [[
                 { field: "BUILDING_NAME", title: "楼宇号", width: 80, align: "center" },
-                { field: "BUILDING_ADDRESS", title: "详细地址（蓝牌地址码)", width: 80, align: "center" },
+                { field: "BUILDING_ADDRESS", title: "详细地址", width: 80, align: "center" },
+                { field: "BLUELABEL", title: "蓝牌地址码", width: 80, align: "center"},
                 {
                     field: "BUILDING_ACTION", title: "操作", width: 80, align: "center", formatter: function (value, row, index) {
 
@@ -261,7 +268,28 @@
         $('#dg2').datagrid({
             onClickRow: function (index, field, value) {
                 map.setZoom(18);
-                map.setCenter([field.LNG, field.LAT]);
+                // set all markers to blue and find marker with same lng/lat and set it to red
+                //map.setCenter([field.LNG, field.LAT]);
+                console.log(map.getAllOverlays('marker'));
+                  var icon = new AMap.Icon({
+                                size: new AMap.Size(15, 15),
+                                image: './icons/circle.png', // Icon的图像
+                                imageSize: new AMap.Size(15, 15)
+                  });
+                 var icon2 = new AMap.Icon({
+                                    size: new AMap.Size(15, 15),
+                                    image: './icons/circle1.png', // Icon的图像
+                                    imageSize: new AMap.Size(15, 15)
+                                });
+                 var markers = map.getAllOverlays("marker");
+                        markers.forEach(function (marker) {
+                            marker.setIcon(icon);
+                        });
+                     markers.forEach(function (marker) {
+                            if (marker.getPosition()["lng"] == field.LNG && marker.getPosition()["lat"] == field.LAT) {
+                                marker.setIcon(icon2);
+                            }
+                        });
             }
         });
 
@@ -288,7 +316,7 @@
             var county = $("#selectCounty").find("option:selected").text();
             var adcode = document.getElementById('selectCounty').value;
             var region = province + "/" + city + "/" + county;
-            if (province !== "所有" && city !== "所有" && county !== "所有") {
+            if (province !== "全部" && city !== "全部" && county !== "全部") {
                 $.ajax({
                     type: "get",
                     url: `./api/regionexists2?region=${region}`,
@@ -360,7 +388,7 @@
                                                         $.ajax({
                                                             type: "post",
                                                             url: `./API/CreateBuildings`,
-                                                            data: { "building_code": poi["id"], "building_number": building_number, "building_name": poi["name"], "building_address": poi["address"], "building_region": region, "building_type": poi["type"], "building_x": lng, "building_y": lat, "building_lng": lng, "building_lat": lat, "village_id": poi["parent"], "source": "1" },
+                                                            data: { "building_code": poi["id"], "building_number": building_number, "building_name": poi["name"], "building_address": poi["address"], "building_region": region, "building_type": poi["type"], "building_x": lng, "building_y": lat, "building_lng": lng, "building_lat": lat, "village_id": poi["parent"], "source": "高德" },
                                                             dataType: "json",
                                                             success: function (data) {
                                                                 if (data.length !== 0) {
@@ -468,7 +496,7 @@
             var county = $("#selectCounty").find("option:selected").text();
             var adcode = document.getElementById('selectCounty').value;
             var region = province + "/" + city + "/" + county;
-            if (province !== "所有" && city !== "所有" && county !== "所有") {
+            if (province !== "全部" && city !== "全部" && county !== "全部") {
                 $.ajax({
                     type: "get",
                     url: `./api/regionexists?region=${region}`,
@@ -541,7 +569,7 @@
                                                         $.ajax({
                                                             type: "post",
                                                             url: `./API/CreateVillages`,
-                                                            data: { "village_code": poi["id"], "village_name": poi["name"], "village_address": poi["address"], "village_region": region, "village_type": poi["type"], "village_x": lng, "village_y": lat, "village_lng": lng, "village_lat": lat, "source": "1" },
+                                                            data: { "village_code": poi["id"], "village_name": poi["name"], "village_address": poi["address"], "village_region": region, "village_type": poi["type"], "village_x": lng, "village_y": lat, "village_lng": lng, "village_lat": lat, "source": "高德" },
                                                             dataType: "json",
                                                             success: function (data) {
                                                                 if (data.length !== 0) {
@@ -628,7 +656,7 @@
                 var village_y = String(JSON.parse(document.getElementById('fieldHidden').value)[0][1]);
                 var village_lng = String(JSON.parse(document.getElementById('fieldHidden').value)[0][0]);
                 var village_lat = String(JSON.parse(document.getElementById('fieldHidden').value)[0][1]);
-                var source = String(2);
+                var source = "自建";
                 $.ajax({
                     type: "post",
                     url: `./API/CreateVillage`,
@@ -738,7 +766,7 @@
             var building_address = inputs[2].value;
             var building_region = $('#selectProvinceTemp').find(":selected").text() + $('#selectCityTemp').find(":selected").text() + $('#selectCountyTemp').find(":selected").text();
             var building_type = selects[3].value;
-            var source = String(2);
+            var source = "自建";
             $.ajax({
                 type: "post",
                 url: `./API/CreateBuilding`,
@@ -1279,7 +1307,7 @@
             var city = $("#selectCity").find("option:selected").text();
             var county = $("#selectCounty").find("option:selected").text();
             var region = province + "/" + city + "/" + county;
-            if (province !== "所有" && city !== "所有" && county !== "所有") {
+            if (province !== "全部" && city !== "全部" && county !== "全部") {
                 map.clearMap();
                 $("#dg").datagrid({
                     url: `./API/SearchByRegion?text=${textSearch}&region=${region}`,
@@ -1288,7 +1316,7 @@
                         document.getElementsByClassName('datagrid-row')[0].click();
                     }
                 });
-            } else if (province !== "所有" && city !== "所有" && county === "所有") {
+            } else if (province !== "全部" && city !== "全部" && county === "全部") {
                 map.clearMap();
                 $("#dg").datagrid({
                     url: `./api/SearchByCity?text=${textSearch}&city=${city}`,
@@ -1306,20 +1334,24 @@
             var city = $("#selectCity").find("option:selected").text();
             var county = $("#selectCounty").find("option:selected").text();
             var region = province + "/" + city + "/" + county;
-            if (province !== "所有" && city !== "所有" && county !== "所有") {
+            if (province !== "全部" && city !== "全部" && county !== "全部") {
                 map.clearMap();
                 $("#dg2").datagrid({
                     url: `./API/SearchByRegionBuildings?text=${textSearch}&region=${region}`,
                     method: 'get',
                     onLoadSuccess: function (data) {
+                                                document.getElementsByClassName('datagrid-row')[10].click();
+
                     }
                 });
-            } else if (province !== "所有" && city !== "所有" && county === "所有") {
+            } else if (province !== "全部" && city !== "全部" && county === "全部") {
                 map.clearMap();
                 $("#dg2").datagrid({
                     url: `./API/SearchByCityBuildings?text=${textSearch}&city=${city}`,
                     method: 'get',
                     onLoadSuccess: function (data) {
+                                                document.getElementsByClassName('datagrid-row')[10].click();
+
                     }
                 });
             }
@@ -1379,7 +1411,7 @@
                 selectP.addEventListener('change', function (e) {
                     var value = e.target.value;
                     if (value !== "") {
-                        selectC.innerHTML = `<option value="">所有</option>`;
+                        selectC.innerHTML = `<option value="">全部</option>`;
                         d.forEach(function (i) {
                             if ((i["item_code"].slice(0, 2) === value.slice(0, 2)) && (i["item_code"].slice(2) !== "0000") && (i["item_code"].slice(4, 6) === "00")) {
                                 selectC.innerHTML += `<option value=${i["item_code"]}>${i["item_name"]}</option>`;
@@ -1390,7 +1422,7 @@
                 selectC.addEventListener('change', function (e) {
                     var value = e.target.value;
                     if (value !== "") {
-                        selectCT.innerHTML = `<option value="">所有</option>`;
+                        selectCT.innerHTML = `<option value="">全部</option>`;
                         d.forEach(function (i2) {
                             if (value == '110100' || value == "120100" || value == "310100" || value == "500100") {
                                 if (value.slice(0, 3) === (i2["item_code"].slice(0, 3)) && (i2["item_code"].slice(4, 6) !== "00")) {
