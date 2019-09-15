@@ -163,7 +163,9 @@
                 document.getElementById('fieldHidden').value = JSON.stringify(list);
                 } else {
                     var position = polygon.getPosition();
-                    console.log(position);
+                    var lng = position.lng;
+                    var lat = position.lat;
+                    document.getElementById('fieldHidden').value = lng + ' ' + lat;
                 }
                
             });
@@ -172,7 +174,7 @@
         $("#dg").datagrid({
             columns: [[
                 { field: "VILLAGE_NAME", title: "小区名称", width: 80, align: "center" },
-                { field: "VILLAGE_ADDRESS", title: "地址", width: 80, align: "center" },
+                { field: "VILLAGE_ADDRESS", title: "详细地址", width: 80, align: "center" },
                 { field: "VILLAGE_REGION", title: "区域", width: 80, align: "center" },
                 { field: "VILLAGE_TYPE", title: "类型", width: 80, align: "center" },
                 { field: "VILLAGE_COUNT", title: "楼宇数", width: 80, align: "center" },
@@ -789,13 +791,17 @@
             var building_number = inputs[0].value;
             var building_name = inputs[1].value;
             var building_address = inputs[2].value;
-            var building_region = $('#selectProvinceTemp').find(":selected").text() + $('#selectCityTemp').find(":selected").text() + $('#selectCountyTemp').find(":selected").text();
+            var bluelabel = inputs[3].value;
+            var building_region = $('#selectProvinceTemp').find(":selected").text() + '/' + $('#selectCityTemp').find(":selected").text() + '/'+ $('#selectCountyTemp').find(":selected").text();
             var building_type = selects[3].value;
+            var building_lng = document.getElementById('fieldHidden').value.split(" ")[0];
+            var building_lat = document.getElementById('fieldHidden').value.split(" ")[1];
+            var village_id = document.getElementById('fieldHidden2').value;
             var source = "自建";
             $.ajax({
                 type: "post",
                 url: `./API/CreateBuilding`,
-                data: { "building_number": building_number, "building_name": building_name, "building_address": building_address, "building_region": building_region, "building_type": building_type, "source": source },
+                data: { "building_number": building_number, "building_name": building_name, "building_address": building_address, "bluelabel": bluelabel, "building_region": building_region, "building_type": building_type, "building_lng": building_lng, "building_lat": building_lat, "village_id": village_id, "source": source },
                 dataType: "json",
                 success: function (data) {
                     if (data.length !== 0) {
@@ -808,6 +814,7 @@
                     } else {
                         layer.closeAll();
                         layer.msg("楼宇已添加");
+                        $('#dg2').datagrid('reload'); 
                     }
                 },
                 error: function (item, err) {
@@ -820,6 +827,7 @@
             mousetool.close(true);
             var villageSelected = $('#dg').datagrid('getSelected');
             if (villageSelected !== null) {
+                var villageId = villageSelected.VILLAGE_ID;
                 var optionsProvince = document.getElementById('selectProvince').innerHTML;
                 var optionsCity = document.getElementById('selectCity').innerHTML;
                 var optionsCounty = document.getElementById('selectCounty').innerHTML;
@@ -873,6 +881,12 @@
     <label class="layui-form-label"></label>
     <div class="layui-input-inline">
      <input type="text" id="fieldHidden" name="building_lnglat" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" />
+    </div>
+   </div>
+ <div class="layui-form-item hidden">
+    <label class="layui-form-label"></label>
+    <div class="layui-input-inline">
+     <input type="text" id="fieldHidden2" name="building_lnglat" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" value="` + villageId + `"/>
     </div>
    </div>
 <div class="layui-form-item">
@@ -932,7 +946,7 @@
                         offset: ['100px', '80%'],
                         shade: 0,
                         title: "楼宇信息",
-                        content: `<div class="mb-10"><span class="mr-5 bold">楼宇名称:</span><span>${data["ds"][0]["BUILDING_NAME"]}</span></div><div  class="mb-10"><span class="mr-5 bold">详细地址:</span><span>${data["ds"][0]["BUILDING_ADDRESS"]}</span></div><div  class="mb-10"><span class="mr-5 bold">区域:</span><span>${data["ds"][0]["REGION"]}</span></div><div  class="mb-10"><span class="mr-5 bold">类型:</span><span>${data["ds"][0]["TYPE"]}</span></div>`
+                        content: `<div class="mb-10"><span class="mr-5 bold">楼宇名称:</span><span>${data["ds"][0]["BUILDING_NAME"]}</span></div><div  class="mb-10"><span class="mr-5 bold">详细地址:</span><span>${data["ds"][0]["BUILDING_ADDRESS"]}</span></div><div  class="mb-10"><span class="mr-5 bold">蓝牌地址码:</span><span>${data["ds"][0]["BLUELABEL"]}</span></div><div  class="mb-10"><span class="mr-5 bold">区域:</span><span>${data["ds"][0]["REGION"]}</span></div><div  class="mb-10"><span class="mr-5 bold">类型:</span><span>${data["ds"][0]["TYPE"]}</span></div>`
                     });
                 },
                 error: function (item, err) {
@@ -1199,13 +1213,14 @@
             var building_number = inputs[0].value;
             var building_name = inputs[1].value;
             var building_address = inputs[2].value
-            var building_region = inputs[3].value;
-            var building_type = inputs[4].value;
+            var bluelabel =  inputs[3].value
+            var building_region = inputs[4].value;
+            var building_type = inputs[5].value;
             var dataGuid = e.getAttribute("data-guid");
             $.ajax({
                 type: "post",
                 url: `./API/EditBuilding?id=${dataGuid}`,
-                data: { "building_number": building_number, "building_name": building_name, "building_address": building_address, "building_region": building_region, "building_type": building_type },
+                data: { "building_number": building_number, "building_name": building_name, "building_address": building_address, "bluelabel": bluelabel, "building_region": building_region, "building_type": building_type },
                 dataType: "json",
                 success: function (data) {
                     if (data.length !== 0) {
@@ -1218,6 +1233,7 @@
                     } else {
                         layer.closeAll();
                         layer.msg("楼宇已编辑");
+                        $('#dg2').datagrid('reload'); 
                         //$('#dg2').datagrid('updateRow', {
                         //    index: document.getElementsByTagName("body")[0].getAttribute("data-currentindex"),
                         //    row: {
@@ -1244,7 +1260,7 @@
                     layer.open({
                         btn: [],
                         shade: 0,
-                        title: "编辑楼宇信息",
+                        title: "编辑楼宇",
                         content: `<form class="layui-form layui-form-pane" action="" onsubmit="event.preventDefault();editPoiBuilding(this);" data-guid=${dataGuid}>
                   <div class="layui-form-item">
                     <label class="layui-form-label">楼宇号码</label>
@@ -1262,6 +1278,12 @@
                     <label class="layui-form-label">详细地址</label>
                     <div class="layui-input-inline">
                       <input type="text" name="building_address" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" value="${data["ds"][0]["BUILDING_ADDRESS"]}" required>
+                    </div>
+                  </div>
+ <div class="layui-form-item">
+                    <label class="layui-form-label">蓝牌地址码</label>
+                <div class="layui-input-block">
+                      <input type="text" name="bluelabel" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" value="${data["ds"][0]["BLUELABEL"]}" required>
                     </div>
                   </div>
                 <div class="layui-form-item">
@@ -1326,6 +1348,7 @@
                     } else {
                         layer.closeAll();
                         layer.msg("楼宇已删除");
+                        $('#dg2').datagrid('reload'); 
                         //var index = document.getElementsByTagName("body")[0].getAttribute("data-currentindex");
                         //$('#dg2').datagrid('deleteRow', index);
                     }
@@ -1507,10 +1530,14 @@
                         });
                         // get data for current city and display on map
                         var city = $("#selectCity").find("option:selected").text();
+                        
+                     
                         $("#dg").datagrid({
+                            pageNumber: 1,
                             url: `./api/IndexByCity?city=${city}`,
                             method: 'get',
                             onLoadSuccess: function (data) {
+                              
                                 document.getElementsByClassName('datagrid-row')[0].click();
                             }
                         });
@@ -1526,18 +1553,22 @@
                         var county = $("#selectCounty").find("option:selected").text();
                         var region = province + "/" + city + "/" + county;
                         $("#dg").datagrid({
+                            pageNumber: 1,
                             url: `./API/IndexByRegion?region=${region}`,
                             method: 'get',
                             onLoadSuccess: function (data) {
+                               
                                 document.getElementsByClassName('datagrid-row')[0].click();
                             }
                         });
                     } else {
                         var city = $("#selectCity").find("option:selected").text();
                         $("#dg").datagrid({
+                            pageNumber: 1,
                             url: `./api/IndexByCity?city=${city}`,
                             method: 'get',
                             onLoadSuccess: function (data) {
+                                
                                 document.getElementsByClassName('datagrid-row')[0].click();
                             }
                         });

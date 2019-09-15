@@ -843,8 +843,12 @@ namespace jjlbs_service.Controllers
             string building_number = HttpContext.Request.Form["building_number"];
             string building_name = HttpContext.Request.Form["building_name"];
             string building_address = HttpContext.Request.Form["building_address"];
+            string bluelabel = HttpContext.Request.Form["bluelabel"];
             string building_region = HttpContext.Request.Form["building_region"];
             string building_type = HttpContext.Request.Form["building_type"];
+            string building_lng = HttpContext.Request.Form["building_lng"];
+            string building_lat = HttpContext.Request.Form["building_lat"];
+            string village_id = HttpContext.Request.Form["village_id"];
             //string building_bounds = HttpContext.Request.Form["building_bounds"];
             //string building_x = HttpContext.Request.Form["building_x"];
             //string building_y = HttpContext.Request.Form["building_y"];
@@ -864,6 +868,10 @@ namespace jjlbs_service.Controllers
             {
                 errors.Add("详细地址不能为空");
             }
+            if (bluelabel.Length == 0)
+            {
+                errors.Add("蓝牌地址码不能为空");
+            }
             if (building_region.Length == 0)
             {
                 errors.Add("区域不能为空");
@@ -876,22 +884,18 @@ namespace jjlbs_service.Controllers
             //{
             //    errors.Add("楼宇边界不能为空");
             //}
-            //if (building_x.Length == 0)
-            //{
-            //    errors.Add("楼宇经度不能为空");
-            //}
-            //if (building_y.Length == 0)
-            //{
-            //    errors.Add("楼宇纬度不能为空");
-            //}
-            //if (building_lng.Length == 0)
-            //{
-            //    errors.Add("楼宇经度不能为空");
-            //}
-            //if (building_lng.Length == 0)
-            //{
-            //    errors.Add("楼宇纬度不能为空");
-            //}
+            if (building_lng.Length == 0)
+            {
+                errors.Add("楼宇经度不能为空");
+            }
+            if (building_lat.Length == 0)
+            {
+                errors.Add("楼宇纬度不能为空");
+            }
+            if (village_id.Length == 0)
+            {
+                errors.Add("小区ID不能为空");
+            }
             if (source.Length == 0)
             {
                 errors.Add("楼宇来源不能为空");
@@ -904,7 +908,7 @@ namespace jjlbs_service.Controllers
             {
                 Oraclehp ohp = new Oraclehp();
                 //DataSet data = ohp.Query($"begin insert into lbs_building (building_number, building_name, building_address, region, type, bounds, x, y, lng, lat, source) values ('{building_number}','{building_name}','{building_address}','{building_region}','{building_type}', '{building_bounds}','{building_x}','{building_y}','{building_lat}','{building_lng}','{source}');commit;end;");
-                DataSet data = ohp.Query($"begin insert into lbs_building (building_number, building_name, building_address, region, type, source) values ('{building_number}','{building_name}','{building_address}','{building_region}','{building_type}', '{source}');commit;end;");
+                DataSet data = ohp.Query($"begin insert into lbs_building (building_number, building_name, building_address, bluelabel, region, type, x, y, lng, lat, village_id, source) values ('{building_number}','{building_name}','{building_address}', '{bluelabel}', '{building_region}','{building_type}', '{building_lng}','{building_lat}','{building_lng}','{building_lat}','{village_id}','{source}');commit;end;");
 
                 return "[]";
             }
@@ -1002,6 +1006,7 @@ namespace jjlbs_service.Controllers
             string building_number = HttpContext.Request.Form["building_number"];
             string building_name = HttpContext.Request.Form["building_name"];
             string building_address = HttpContext.Request.Form["building_address"];
+            string bluelabel = HttpContext.Request.Form["bluelabel"];
             string building_region = HttpContext.Request.Form["building_region"];
             string building_type = HttpContext.Request.Form["building_type"];
             List<string> errors = new List<string>();
@@ -1016,6 +1021,10 @@ namespace jjlbs_service.Controllers
             if (building_address.Length == 0)
             {
                 errors.Add("详细地址不能为空");
+            }
+            if (bluelabel.Length == 0)
+            {
+                errors.Add("蓝牌地址码不能为空");
             }
             if (building_region.Length == 0)
             {
@@ -1032,7 +1041,7 @@ namespace jjlbs_service.Controllers
             else
             {
                 Oraclehp ohp = new Oraclehp();
-                DataSet data = ohp.Query($"begin update lbs_building set building_number ='{building_number}',building_name ='{building_name}',building_address='{building_address}',region ='{building_region}',type ='{building_type}' where building_id = '{id}';commit;end;");
+                DataSet data = ohp.Query($"begin update lbs_building set building_number ='{building_number}',building_name ='{building_name}',building_address='{building_address}',bluelabel='{bluelabel}',region ='{building_region}',type ='{building_type}' where building_id = '{id}';commit;end;");
                 return "[]";
             }
         }
