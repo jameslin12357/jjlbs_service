@@ -196,6 +196,49 @@ namespace jjlbs_service.Controllers
             return jsonf;
         }
 
+        public string GetBuildingsPaginatedSearch(string text, string page, string rows, string villageid)
+        {
+            var pageInt = int.Parse(page);
+            var rowsInt = int.Parse(rows);
+            var start = (pageInt * rowsInt) - rowsInt;
+            var end = pageInt * rowsInt;
+            if (text == "")
+            {
+                Oraclehp ohp = new Oraclehp();
+                DataSet data = ohp.Query($"select * from(select r.*, rownum as rn from(select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, REGION, TYPE, LNG, LAT, VILLAGE_ID, BLUELABEL from lbs_building lb  where lb.village_id = '{villageid}' order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+                DataSet dataCount = ohp.Query($"select count(*) as total from lbs_building lb where lb.village_id = '{villageid}'");
+                //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+                //DataSet data2 = ohp.Query($"select * from lbs_building");
+                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+                //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+                int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+                string json = JsonConvert.SerializeObject(data);
+                json = json.Substring(6, json.Length - 7);
+                string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+                //var result = new { total = count, rows = json };
+                //return JsonConvert.SerializeObject(result);
+                return jsonf;
+            } else
+            {
+                Oraclehp ohp = new Oraclehp();
+                DataSet data = ohp.Query($"select * from(select r.*, rownum as rn from(select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, REGION, TYPE, LNG, LAT, VILLAGE_ID, BLUELABEL from lbs_building lb  where lb.village_id = '{villageid}'  and lb.building_name like '%{text}%' order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+                DataSet dataCount = ohp.Query($"select count(*) as total from lbs_building lb where lb.village_id = '{villageid}' and lb.building_name like '%{text}%'");
+                //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+                //DataSet data2 = ohp.Query($"select * from lbs_building");
+                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+                //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+                int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+                string json = JsonConvert.SerializeObject(data);
+                json = json.Substring(6, json.Length - 7);
+                string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+                //var result = new { total = count, rows = json };
+                //return JsonConvert.SerializeObject(result);
+                return jsonf;
+            }
+        }
+
 
         public string RegionExists(string region)
         {

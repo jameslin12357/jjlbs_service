@@ -49,12 +49,12 @@
             <div class="flex aic">
                 <input type="text" id="inputSearchVillage" placeholder="输入小区名称检索" class="mr-10 pd-5px bd2-lightblue" />
                 <i id="inputSearchIcon" class="fa fa-search cr-lightblue" onclick="searchVillage(this)"></i>
-                <div class="mr-10">
-                    <i class="fa fa-file-o cr-lightblue" onclick="newVillage(this)"></i>
+                <div class="mr-10 cursorPointer" onclick="newVillage(this)">
+                    <i class="fa fa-file-o cr-lightblue"></i>
                     <span> 新建小区</span>
                 </div>
-                <div>
-                    <i class="fa fa-download cr-lightblue" onclick="getVillage(this)" id="getVillage"></i>
+                <div class="cursorPointer" onclick="getVillage(this)">
+                    <i class="fa fa-download cr-lightblue" id="getVillage"></i>
                     <span> 更新本地数据</span>
                 </div>
             </div>
@@ -64,12 +64,12 @@
             <div class="flex aic">
                 <input type="text" id="inputSearchBuilding" placeholder="输入楼宇号检索" class="mr-10 pd-5px bd2-lightblue" />
                 <i id="inputSearchIcon" class="fa fa-search cr-lightblue" onclick="searchBuilding(this)"></i>
-                <div class="mr-10">
-                    <i class="fa fa-file-o cr-lightblue" onclick="newBuilding(this)"></i>
+                <div class="mr-10 cursorPointer" onclick="newBuilding(this)">
+                    <i class="fa fa-file-o cr-lightblue"></i>
                     <span> 新建楼宇</span>
                 </div>
-                <div>
-                    <i class="fa fa-download cr-lightblue" onclick="getBuilding(this)"></i>
+                <div class="cursorPointer" onclick="getBuilding(this)">
+                    <i class="fa fa-download cr-lightblue"></i>
                     <span> 更新本地数据</span>
                 </div>
             </div>
@@ -95,7 +95,7 @@
             <thead>
                 <tr>
                     @*
-                        <th field="BUILDING_NAME" width="80" align="center">楼宇号</th>
+                        <th field="BUILDING_NAME" width="80" align="center">楼宇名称</th>
                         <th field="building_address" width="100" align="center">详细地址（蓝牌地址码)</th>
                         <th field="building_action" width="80" align="center">操作</th>*@
                 </tr>
@@ -152,15 +152,20 @@
             mousetool.on('draw', function (event) {
                 // event.obj 为绘制出来的覆盖物对象
                 var polygon = event.obj;
-                var bounds = polygon.getPath();
+                if (polygon.CLASS_NAME === "AMap.Polygon") {
+                     var bounds = polygon.getPath();
                 var list = [];
                 bounds.forEach(function (coord) {
                     var lng = coord["lng"];
                     var lat = coord["lat"];
                     list.push([lng, lat]);
-
                 })
                 document.getElementById('fieldHidden').value = JSON.stringify(list);
+                } else {
+                    var position = polygon.getPosition();
+                    console.log(position);
+                }
+               
             });
         });
 
@@ -190,7 +195,7 @@
 
         $("#dg2").datagrid({
             columns: [[
-                { field: "BUILDING_NAME", title: "楼宇号", width: 80, align: "center" },
+                { field: "BUILDING_NAME", title: "楼宇名称", width: 80, align: "center" },
                 { field: "BUILDING_ADDRESS", title: "详细地址", width: 80, align: "center" },
                 { field: "BLUELABEL", title: "蓝牌地址码", width: 80, align: "center"},
                 {
@@ -215,10 +220,11 @@
                 map.setCenter([field.VILLAGE_LNG, field.VILLAGE_LAT]);
                 if (field.VILLAGE_BOUNDS !== null) {
                     var polygon = new AMap.Polygon({
+                        strokeWeight: 4,
+                        strokeOpacity: 1,
                         strokeColor: "#2828FF",
                         fillOpacity: 0,
                         bubble: true,
-                        strokeWeight: 1,
                         path: JSON.parse(field.VILLAGE_BOUNDS),
                         map: map
                     });
@@ -267,7 +273,7 @@
 
         $('#dg2').datagrid({
             onClickRow: function (index, field, value) {
-                map.setZoom(18);
+                
                 // set all markers to blue and find marker with same lng/lat and set it to red
                 //map.setCenter([field.LNG, field.LAT]);
                 console.log(map.getAllOverlays('marker'));
@@ -629,6 +635,17 @@
                 // strokeStyle是dashed时有效
                 // strokeDasharray: [30,10],
             });
+    }
+
+    function drawMarker() {
+         var icon = new AMap.Icon({
+                                    size: new AMap.Size(15, 15),
+                                    image: './icons/circle.png',  // Icon的图像
+                                    imageSize: new AMap.Size(15, 15)
+                                });
+            mousetool.marker({
+                                    icon: icon // 添加 Icon 图标 URL
+            });
         }
 
         function addVillage(e) {
@@ -649,7 +666,7 @@
                 var selects = e.getElementsByTagName('select');
                 var village_name = inputs[0].value;
                 var village_address = inputs[1].value;
-                var village_region = $('#selectProvinceTemp').find(":selected").text() + $('#selectCityTemp').find(":selected").text() + $('#selectCountyTemp').find(":selected").text();
+                var village_region = $('#selectProvinceTemp').find(":selected").text() + '/' + $('#selectCityTemp').find(":selected").text() + '/' + $('#selectCountyTemp').find(":selected").text();
                 var village_type = selects[3].value;
                 var village_bounds = document.getElementById('fieldHidden').value;
                 var village_x = String(JSON.parse(document.getElementById('fieldHidden').value)[0][0]);
@@ -673,6 +690,7 @@
                         } else {
                             layer.closeAll();
                             layer.msg("小区已添加");
+                            $('#dg').datagrid('reload'); 
                         }
                     },
                     error: function (item, err) {
@@ -690,7 +708,11 @@
             var selectProvince = `<select id="selectProvinceTemp" required>` + optionsProvince.slice(28) + `</select>`;
             var selectCity = `<select id="selectCityTemp" required>` + optionsCity.slice(28) + `</select>`;
             var selectCounty = `<select id="selectCountyTemp" required>` + optionsCounty.slice(28) + `</select>`;
-            layer.open({
+             var province = $("#selectProvince").find("option:selected").text();
+            var city = $("#selectCity").find("option:selected").text();
+            var county = $("#selectCounty").find("option:selected").text();
+            if (province !== "全部" && city !== "全部" && county !== "全部") {
+                   layer.open({
                 btn: [],
                 maxWidth: 750,
                 shade: 0,
@@ -734,7 +756,7 @@
     </div>
    </div>
    <div class="layui-form-item">
-    <label class="layui-form-label">编辑边界</label>
+    <label class="layui-form-label">添加边界</label>
     <div class="layui-input-block">
      <input type="checkbox" name="close" lay-skin="switch" lay-text="是|否" lay-filter="switchT" id="cb" />
     </div>
@@ -750,6 +772,9 @@
                     mousetool.close(true);
                 }
             });
+            }
+
+         
         }
 
 
@@ -793,18 +818,20 @@
 
         function newBuilding(e) {
             mousetool.close(true);
-            var optionsProvince = document.getElementById('selectProvince').innerHTML;
-            var optionsCity = document.getElementById('selectCity').innerHTML;
-            var optionsCounty = document.getElementById('selectCounty').innerHTML;
-            var selectProvince = `<select id="selectProvinceTemp" required>` + optionsProvince.slice(28) + `</select>`;
-            var selectCity = `<select id="selectCityTemp" required>` + optionsCity.slice(28) + `</select>`;
-            var selectCounty = `<select id="selectCountyTemp" required>` + optionsCounty.slice(28) + `</select>`;
-            layer.open({
-                btn: [],
-                maxWidth: 750,
-                shade: 0,
-                title: "新建楼宇",
-                content: `<form class="layui-form layui-form-pane" action="" onsubmit="event.preventDefault();addBuilding(this);">
+            var villageSelected = $('#dg').datagrid('getSelected');
+            if (villageSelected !== null) {
+                var optionsProvince = document.getElementById('selectProvince').innerHTML;
+                var optionsCity = document.getElementById('selectCity').innerHTML;
+                var optionsCounty = document.getElementById('selectCounty').innerHTML;
+                var selectProvince = `<select id="selectProvinceTemp" required>` + optionsProvince.slice(28) + `</select>`;
+                var selectCity = `<select id="selectCityTemp" required>` + optionsCity.slice(28) + `</select>`;
+                var selectCounty = `<select id="selectCountyTemp" required>` + optionsCounty.slice(28) + `</select>`;
+                layer.open({
+                    btn: [],
+                    maxWidth: 750,
+                    shade: 0,
+                    title: "新建楼宇",
+                    content: `<form class="layui-form layui-form-pane" action="" onsubmit="event.preventDefault();addBuilding(this);">
                    <div class="layui-form-item">
                     <label class="layui-form-label">楼宇号码</label>
                 <div class="layui-input-block">
@@ -823,10 +850,16 @@
                       <input type="text" name="building_address" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required>
                     </div>
                   </div>
+ <div class="layui-form-item">
+                    <label class="layui-form-label">蓝牌地址码</label>
+                <div class="layui-input-block">
+                      <input type="text" name="bluelabel" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required>
+                    </div>
+                  </div>
        <div class="layui-form-item">
     <label class="layui-form-label">区域</label>
     <div class="layui-input-inline">` + selectProvince + `</div><div class="layui-input-inline">` + selectCity + `</div><div class="layui-input-inline">` + selectCounty +
-                    `</select></div></div>
+                        `</select></div></div>
 
 <div class="layui-form-item">
                 <label class="layui-form-label">类型</label>
@@ -836,10 +869,30 @@
                   </select>
                 </div>
               </div>
+   <div class="layui-form-item hidden">
+    <label class="layui-form-label"></label>
+    <div class="layui-input-inline">
+     <input type="text" id="fieldHidden" name="building_lnglat" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" />
+    </div>
+   </div>
+<div class="layui-form-item">
+    <label class="layui-form-label">添加位置</label>
+    <div class="layui-input-block">
+     <input type="checkbox" name="close" lay-skin="switch" lay-text="是|否" lay-filter="switchT" id="cb" />
+    </div>
+   </div>
  <button type="submit" class="layui-btn layui-btn-normal fr">保存</button>
 </form>`
+                });
+                  form.render();
+            form.on('switch(switchT)', function (data) {
+                if (data.elem.checked) {
+                    drawMarker();
+                } else {
+                    mousetool.close(true);
+                }
             });
-            form.render();
+            }
         }
 
         function getPoiDetail(e) {
@@ -925,6 +978,7 @@
                         } else {
                             layer.closeAll();
                             layer.msg("小区已编辑");
+                            $('#dg').datagrid('reload'); 
                             //$('#dg').datagrid('updateRow', {
                             //    index: document.getElementsByTagName("body")[0].getAttribute("data-currentindex"),
                             //    row: {
@@ -981,6 +1035,7 @@
                     } else {
                         layer.closeAll();
                         layer.msg("小区已编辑");
+                        $('#dg').datagrid('reload'); 
                         //$('#dg').datagrid('updateRow', {
                         //    index: document.getElementsByTagName("body")[0].getAttribute("data-currentindex"),
                         //    row: {
@@ -1011,7 +1066,7 @@
                         layer.open({
                             btn: [],
                             shade: 0,
-                            title: "编辑小区信息",
+                            title: "编辑小区",
                             content: `<form class="layui-form layui-form-pane" action="" onsubmit="event.preventDefault();editPoiBounds(this);" data-guid=${dataGuid}>
                    <div class="layui-form-item">
                     <label class="layui-form-label">小区名称</label>
@@ -1070,7 +1125,7 @@
                         layer.open({
                             btn: [],
                             shade: 0,
-                            title: "编辑小区信息",
+                            title: "编辑小区",
                             content: `<form class="layui-form layui-form-pane" action=""  onsubmit="event.preventDefault();editPoiBounds2(this);" data-guid=${dataGuid}>
                    <div class="layui-form-item">
                     <label class="layui-form-label">小区名称</label>
@@ -1248,6 +1303,7 @@
                     } else {
                         layer.closeAll();
                         layer.msg("小区已删除");
+                        $('#dg').datagrid('reload'); 
                         //var index = document.getElementsByTagName("body")[0].getAttribute("data-currentindex");
                         //$('#dg').datagrid('deleteRow', index);
                     }
@@ -1330,31 +1386,46 @@
 
         function searchBuilding(e) {
             var textSearch = document.getElementById("inputSearchBuilding").value;
-            var province = $("#selectProvince").find("option:selected").text();
-            var city = $("#selectCity").find("option:selected").text();
-            var county = $("#selectCounty").find("option:selected").text();
-            var region = province + "/" + city + "/" + county;
-            if (province !== "全部" && city !== "全部" && county !== "全部") {
-                map.clearMap();
-                $("#dg2").datagrid({
-                    url: `./API/SearchByRegionBuildings?text=${textSearch}&region=${region}`,
+            var villageSelected = $('#dg').datagrid('getSelected');
+            if (villageSelected !== null) {
+                    $("#dg2").datagrid({
+                    url: `./API/GetBuildingsPaginatedSearch?text=${textSearch}&villageid=${villageSelected.VILLAGE_ID}`,
                     method: 'get',
                     onLoadSuccess: function (data) {
-                                                document.getElementsByClassName('datagrid-row')[10].click();
 
-                    }
-                });
-            } else if (province !== "全部" && city !== "全部" && county === "全部") {
-                map.clearMap();
-                $("#dg2").datagrid({
-                    url: `./API/SearchByCityBuildings?text=${textSearch}&city=${city}`,
-                    method: 'get',
-                    onLoadSuccess: function (data) {
-                                                document.getElementsByClassName('datagrid-row')[10].click();
-
+                        //$("#dg").datagrid('selectRow',0);
                     }
                 });
             }
+
+            // get selected village and find its buildings and apply filters (all or some) and return json
+            // data and enter into dg2 datagrid
+
+            //var province = $("#selectProvince").find("option:selected").text();
+            //var city = $("#selectCity").find("option:selected").text();
+            //var county = $("#selectCounty").find("option:selected").text();
+            //var region = province + "/" + city + "/" + county;
+            //if (province !== "全部" && city !== "全部" && county !== "全部") {
+            //    map.clearMap();
+            //    $("#dg2").datagrid({
+            //        url: `./API/SearchByRegionBuildings?text=${textSearch}&region=${region}`,
+            //        method: 'get',
+            //        onLoadSuccess: function (data) {
+            //                                    document.getElementsByClassName('datagrid-row')[10].click();
+
+            //        }
+            //    });
+            //} else if (province !== "全部" && city !== "全部" && county === "全部") {
+            //    map.clearMap();
+            //    $("#dg2").datagrid({
+            //        url: `./API/SearchByCityBuildings?text=${textSearch}&city=${city}`,
+            //        method: 'get',
+            //        onLoadSuccess: function (data) {
+            //                                    document.getElementsByClassName('datagrid-row')[10].click();
+
+            //        }
+            //    });
+            //}
         }
 
         function openPois(e) {
