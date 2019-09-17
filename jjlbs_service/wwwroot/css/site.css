@@ -194,9 +194,8 @@
 
 .selectPCC {
     text-align-last: center;
-    font-weight: bold;
-    font-size: 20px;
-    padding: 15px;
+    font-size: 18px;
+    padding: 10px;
     border: none;
 }
 
@@ -251,4 +250,10 @@ select {
 
 .fs20{
     font-size: 20px;
+}
+
+@media screen and (min-width: 992px) {
+    #selectFilter {
+        margin-left: 10%;
+    }
 }

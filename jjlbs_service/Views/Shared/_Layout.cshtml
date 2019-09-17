@@ -30,18 +30,20 @@
         <div class="mr-10px">
             <img id="menuiconNav" src="/img/menu.png" />
         </div>
-        <div class="pd-15100 bb-lightblue mr-10p bold">
+        <div class="pd-15100 bb-lightblue bold">
             五级地址码
         </div>
         <div id="selectFilter">
-            <select id="selectProvince" class="selectPCC"><option value="">全部</option></select><span class="fs20">/</span>
-            <select id="selectCity" class="selectPCC"><option value="">全部</option></select><span class="fs20">/</span>
+            <select id="selectProvince" class="selectPCC"><option value="">全部</option></select>
+            <span class="fs20">/</span>
+            <select id="selectCity" class="selectPCC"><option value="">全部</option></select>
+            <span class="fs20">/</span>
             <select id="selectCounty" class="selectPCC"><option value="">全部</option></select>
-        </div>
-        @*<div class="tabsMain">
-            <button type="button" class="layui-btn layui-btn-primary layui-btn-radius selectedButton tabBorderLeft bd0">高德地图</button>
-            <button type="button" class="layui-btn layui-btn-primary layui-btn-radius tabBorderRight m0 bd0">ARCGIS</button>
-        </div>*@
+        </div> @*
+            <div class="tabsMain">
+             <button type="button" class="layui-btn layui-btn-primary layui-btn-radius selectedButton tabBorderLeft bd0">高德地图</button>
+             <button type="button" class="layui-btn layui-btn-primary layui-btn-radius tabBorderRight m0 bd0">ARCGIS</button>
+            </div>*@
     </div>
     <div id="footer" class="flex">
         <div id="tb" class="flex sb aic" style="padding: 10px;">
@@ -76,29 +78,12 @@
         </div>
         <table id="dg" class="easyui-datagrid" style="width:65%;height:100%" iconcls="icon-save" pagination="true" data-options="fitColumns:true,rownumbers:false,singleSelect:true,pagination:true,toolbar:tb,loadMsg:'数据加载中'">
             <thead>
-                <tr>
-                    @*
-                        <th field="VILLAGE_NAME" width="80" align="center">小区名称</th>
-                        <th field="VILLAGE_ADDRESS" width="100" align="center">地址</th>
-                        <th field="VILLAGE_REGION" width="80" align="center">区域</th>
-                        <th field="VILLAGE_TYPE" width="80" align="center">类型</th>
-                        <th field="VILLAGE_COUNT" width="80" align="center">楼宇数</th>
-                        <th field="VILLAGE_hasBounds" width="80" align="center">边界</th>
-                        <th field="VILLAGE_ACTION" width="80" align="center">操作</th>
-                        <th field="VILLAGE_ID" align="center" hidden="true">village_id</th>
-                        <th field="VILLAGE_LNG" align="center" hidden="true">经度</th>
-                        <th field="VILLAGE_LAT" align="center" hidden="true">纬度</th>*@
-                </tr>
+                <tr></tr>
             </thead>
         </table>
         <table id="dg2" class="easyui-datagrid" style="width:35%;height:100%" iconcls="icon-save" pagination="true" data-options="fitColumns:true,rownumbers:false,singleSelect:true,pagination:true,toolbar:tb2,loadMsg:'数据加载中'">
             <thead>
-                <tr>
-                    @*
-                        <th field="BUILDING_NAME" width="80" align="center">楼宇名称</th>
-                        <th field="building_address" width="100" align="center">详细地址（蓝牌地址码)</th>
-                        <th field="building_action" width="80" align="center">操作</th>*@
-                </tr>
+                <tr></tr>
             </thead>
         </table>
     </div>
@@ -114,7 +99,6 @@
     <script src="~/layui-v2.5.4/layui/layui.js" charset="utf-8"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script language="javascript">
-
         var form, layer, element;
         layui.use(['form', 'layedit', 'laydate', 'layer', 'element'], function () {
             form = layui.form
@@ -146,6 +130,7 @@
             }
         }));
 
+        //编辑器
         var mousetool;
         map.plugin(["AMap.MouseTool"], function () {
             mousetool = new AMap.MouseTool(map);
@@ -153,23 +138,83 @@
                 // event.obj 为绘制出来的覆盖物对象
                 var polygon = event.obj;
                 if (polygon.CLASS_NAME === "AMap.Polygon") {
-                     var bounds = polygon.getPath();
-                var list = [];
-                bounds.forEach(function (coord) {
-                    var lng = coord["lng"];
-                    var lat = coord["lat"];
-                    list.push([lng, lat]);
-                })
-                document.getElementById('fieldHidden').value = JSON.stringify(list);
+                    var bounds = polygon.getPath();
+                    var list = [];
+                    bounds.forEach(function (coord) {
+                        var lng = coord["lng"];
+                        var lat = coord["lat"];
+                        list.push([lng, lat]);
+                    })
+                    document.getElementById('fieldHidden').value = JSON.stringify(list);
+                    mousetool.close();
+
                 } else {
                     var position = polygon.getPosition();
                     var lng = position.lng;
                     var lat = position.lat;
-                    document.getElementById('fieldHidden').value = lng + ' ' + lat;
+                    document.getElementById('fieldHidden2').innerText = lng + ' ' + lat;
+                    mousetool.close();
                 }
-               
             });
         });
+
+        function drawPolygon() {
+            mousetool.polygon({
+                strokeOpacity: 1,
+                strokeWeight: 3,
+                strokeOpacity: 0.2,
+                fillColor: '#1791fc',
+                fillOpacity: 0.4,
+                // 线样式还支持 'dashed'
+                strokeStyle: "solid",
+                // strokeStyle是dashed时有效
+                // strokeDasharray: [30,10],
+            });
+        }
+
+        function drawMarker() {
+            var icon = new AMap.Icon({
+                size: new AMap.Size(15, 15),
+                image: './icons/circle2.png',  // Icon的图像
+                imageSize: new AMap.Size(15, 15)
+            });
+            mousetool.marker({
+                icon: icon // 添加 Icon 图标 URL
+            });
+        }
+
+        //打开/关闭小区边界
+        function openPois(e) {
+            e.classList.remove("layui-btn-primary");
+            e.classList.add("layui-btn-normal");
+            e.innerHTML += `<i class="fa fa-check ml-3px"></i>`;
+            e.setAttribute("disabled", true);
+            var sibling = e.nextSibling;
+            sibling.classList.remove("layui-btn-normal");
+            sibling.classList.add("layui-btn-primary");
+            sibling.innerHTML = `否`;
+            sibling.removeAttribute("disabled");
+            var overlays = map.getAllOverlays("polygon");
+            overlays.forEach(function (overlay) {
+                overlay.show();
+            });
+        }
+
+        function closePois(e) {
+            e.classList.remove("layui-btn-primary");
+            e.classList.add("layui-btn-normal");
+            e.innerHTML += `<i class="fa fa-check ml-3px"></i>`;
+            e.setAttribute("disabled", true);
+            var sibling = e.previousSibling;
+            sibling.classList.remove("layui-btn-normal");
+            sibling.classList.add("layui-btn-primary");
+            sibling.innerHTML = `是`;
+            sibling.removeAttribute("disabled");
+            var overlays = map.getAllOverlays("polygon");
+            overlays.forEach(function (overlay) {
+                overlay.hide();
+            });
+        }
 
         $("#dg").datagrid({
             columns: [[
@@ -199,10 +244,9 @@
             columns: [[
                 { field: "BUILDING_NAME", title: "楼宇名称", width: 80, align: "center" },
                 { field: "BUILDING_ADDRESS", title: "详细地址", width: 80, align: "center" },
-                { field: "BLUELABEL", title: "蓝牌地址码", width: 80, align: "center"},
+                { field: "BLUELABEL", title: "蓝牌地址码", width: 80, align: "center" },
                 {
                     field: "BUILDING_ACTION", title: "操作", width: 80, align: "center", formatter: function (value, row, index) {
-
                         return `<i class=\"fa fa-eye mr-5 \" data-lng="${row.LNG}" data-lat="${row.LAT}" data-guid="${row.BUILDING_ID}" onclick="getPoiDetail2(this);"></i><i class=\"fa fa-edit mr-5 \" data-guid="${row.BUILDING_ID}" onclick="editPoi2(this);"></i><i class=\"fa fa-trash-o \" data-guid="${row.BUILDING_ID}" onclick="deletePoi2(this);"></i>`;
                     }
                 }
@@ -218,13 +262,12 @@
                 console.log(field);
                 console.log(value);
                 map.clearMap();
-                map.setZoom(18);
+                map.setZoom(17);
                 map.setCenter([field.VILLAGE_LNG, field.VILLAGE_LAT]);
                 if (field.VILLAGE_BOUNDS !== null) {
                     var polygon = new AMap.Polygon({
-                        strokeWeight: 4,
+                        strokeWeight: 2,
                         strokeOpacity: 1,
-                        strokeColor: "#2828FF",
                         fillOpacity: 0,
                         bubble: true,
                         path: JSON.parse(field.VILLAGE_BOUNDS),
@@ -266,7 +309,6 @@
                     url: `./API/GetBuildingsPaginated?villageid=${field.VILLAGE_ID}`,
                     method: 'get',
                     onLoadSuccess: function (data) {
-
                         //$("#dg").datagrid('selectRow',0);
                     }
                 });
@@ -275,226 +317,62 @@
 
         $('#dg2').datagrid({
             onClickRow: function (index, field, value) {
-                
                 // set all markers to blue and find marker with same lng/lat and set it to red
                 //map.setCenter([field.LNG, field.LAT]);
-                console.log(map.getAllOverlays('marker'));
-                  var icon = new AMap.Icon({
-                                size: new AMap.Size(15, 15),
-                                image: './icons/circle.png', // Icon的图像
-                                imageSize: new AMap.Size(15, 15)
-                  });
-                 var icon2 = new AMap.Icon({
-                                    size: new AMap.Size(15, 15),
-                                    image: './icons/circle1.png', // Icon的图像
-                                    imageSize: new AMap.Size(15, 15)
-                                });
-                 var markers = map.getAllOverlays("marker");
-                        markers.forEach(function (marker) {
-                            marker.setIcon(icon);
-                        });
-                     markers.forEach(function (marker) {
-                            if (marker.getPosition()["lng"] == field.LNG && marker.getPosition()["lat"] == field.LAT) {
-                                marker.setIcon(icon2);
-                            }
-                        });
+                var icon = new AMap.Icon({
+                    size: new AMap.Size(15, 15),
+                    image: './icons/circle.png', // Icon的图像
+                    imageSize: new AMap.Size(15, 15)
+                });
+                var icon2 = new AMap.Icon({
+                    size: new AMap.Size(15, 15),
+                    image: './icons/circle1.png', // Icon的图像
+                    imageSize: new AMap.Size(15, 15)
+                });
+                var markers = map.getAllOverlays("marker");
+                markers.forEach(function (marker) {
+                    marker.setIcon(icon);
+                });
+                markers.forEach(function (marker) {
+                    if (marker.getPosition()["lng"] == field.LNG && marker.getPosition()["lat"] == field.LAT) {
+                        marker.setIcon(icon2);
+                    }
+                });
             }
         });
 
-        function getBuildingNumber(str) {
-            var r = str.match(/[a-zA-Z]/);
-            if (r !== null) {
-                return str.slice(r["index"]);
-            } else {
-                var r2 = str.match(/\d/);
-                if (r2 !== null) {
-                    return str.slice(r2["index"]);
-                } else {
-                    return str;
-                }
-            }
-        }
 
-        function getBuilding(e) {
-            var selectP = document.getElementById('selectProvince');
-            var selectC = document.getElementById('selectCity');
-            var selectCT = document.getElementById('selectCounty');
+
+
+        //搜索小区
+        function searchVillage(e) {
+            var textSearch = document.getElementById("inputSearchVillage").value;
             var province = $("#selectProvince").find("option:selected").text();
             var city = $("#selectCity").find("option:selected").text();
             var county = $("#selectCounty").find("option:selected").text();
-            var adcode = document.getElementById('selectCounty').value;
             var region = province + "/" + city + "/" + county;
             if (province !== "全部" && city !== "全部" && county !== "全部") {
-                $.ajax({
-                    type: "get",
-                    url: `./api/regionexists2?region=${region}`,
-                    dataType: "json",
-                    success: function (data) {
-                        if (data["ds"][0]["COUNT"] === 0) {
-                            $.ajax({
-                                type: "get",
-                                url: `https://restapi.amap.com/v3/place/text?key=c7aeb11746b35a92b7b6eee3178a05e4&keywords=&types=190403&city=${adcode}&children=1&offset=5&page=1&extensions=all`,
-                                dataType: "json",
-                                success: function (data) {
-                                    var count = data["count"];
-                                    var times = 0;
-                                    if (count !== 0) {
-                                        //  var piece = 100 / count;
-                                        //var currentP = 0;
-                                        //var currentCount = 0;
-                                        var div = document.createElement('div');
-                                        div.setAttribute('id', 'pb');
-                                        div.innerHTML += `<div class="layui-progress layui-progress-big layui-bg-orange" lay-filter="pb" lay-showpercent="true"">
-  <div class="layui-progress-bar" lay-percent="0%"></div>
-</div>`;
-                                        document.getElementsByTagName('body')[0].appendChild(div);
-
-                                        var currentP = 10;
-                                        //  set your counter to 1
-
-                                        function myLoop() {           //  create a loop function
-                                            setTimeout(function () {    //  call a 3s setTimeout when the loop is called
-                                                element.progress('pb', `${String(currentP)}%`);
-
-
-                                                currentP += 10;                    //  increment the counter
-                                                if (currentP <= 100) {            //  if the counter < 10, call the loop function
-                                                    myLoop();             //  ..  again which will trigger another
-                                                } else {
-                                                    document.getElementById('pb').remove(); layer.msg("楼宇已更新");
-                                                }//  ..  setTimeout()
-                                            }, 1000)
-                                        }
-
-                                        myLoop();
-                                        times = Math.ceil(count / 20);
-                                        console.log(count);
-                                        for (var i = 0; i < times; i++) {
-                                            var page = i + 1;
-                                            console.log('this is page' + page);
-                                            $.ajax({
-                                                type: "get",
-                                                url: `https://restapi.amap.com/v3/place/text?key=c7aeb11746b35a92b7b6eee3178a05e4&keywords=&types=190403&city=${adcode}&children=1&offset=20&page=${page}&extensions=all`,
-                                                dataType: "json",
-                                                success: function (data2) {
-                                                    console.log(data2);
-                                                    data2["pois"].forEach(function (poi) {
-                                                        // currentP += piece;
-                                                        //currentCount += 1;
-                                                        //                                                        console.log(currentCount);
-
-                                                        //var cP = `${String(currentP)}%`;
-                                                        //element.progress('pb', cP);
-                                                        //if (currentCount === Number(count)) {
-                                                        //    setTimeout(function () { document.getElementById('pb').remove();layer.msg("楼宇已更新");},1500);
-                                                        //}
-                                                        var region = `${poi["pname"]}/${poi["cityname"]}/${poi["adname"]}`;
-                                                        var lnglat = poi["location"];
-                                                        var lng = Number(lnglat.split(',')[0]);
-                                                        var lat = Number(lnglat.split(',')[1]);
-                                                        var building_number = getBuildingNumber(poi["name"]);
-                                                        $.ajax({
-                                                            type: "post",
-                                                            url: `./API/CreateBuildings`,
-                                                            data: { "building_code": poi["id"], "building_number": building_number, "building_name": poi["name"], "building_address": poi["address"], "building_region": region, "building_type": poi["type"], "building_x": lng, "building_y": lat, "building_lng": lng, "building_lat": lat, "village_id": poi["parent"], "source": "高德" },
-                                                            dataType: "json",
-                                                            success: function (data) {
-                                                                if (data.length !== 0) {
-                                                                    console.log('error');
-                                                                } else {
-                                                                    //document.getElementsByClassName("modalSmall")[0].remove();
-                                                                    console.log('inserted');
-                                                                    //$('#dg').datagrid('insertRow', {
-                                                                    //    index: 0,
-                                                                    //    row: {
-                                                                    //        village_name: village_name,
-                                                                    //        village_address: village_address,
-                                                                    //        village_region: village_region,
-                                                                    //        village_type: village_type
-                                                                    //    }
-                                                                    //});
-
-
-                                                                }
-                                                            },
-                                                            error: function (item, err) {
-                                                                console.log(err);
-                                                            }
-                                                        });
-                                                        //var parent = poi["parent"];
-                                                        //var village_id = "";
-                                                        //                            $.ajax({
-                                                        //    type: "get",
-                                                        //    url: `./api/getBuildingVillageId?code=${parent}`,
-                                                        //    dataType: "json",
-                                                        //    success: function (data3) {
-                                                        //        if (data3 !== "404") {
-                                                        //            if (data3["ds"] !== undefined) {
-                                                        //                if (data3["ds"].length !== 0) {
-                                                        //                    village_id = data3["ds"][0];
-                                                        //                }
-                                                        //            }
-
-                                                        //        }
-
-                                                        //        console.log(data3);
-                                                        //        $.ajax({
-                                                        //                type: "post",
-                                                        //                url: `./API/CreateBuildings`,
-                                                        //                data: { "building_code":poi["id"],"building_number": building_number, "building_name": poi["name"], "building_address": poi["address"], "building_region": region, "building_type": poi["type"], "building_x":lng,"building_y":lat,"building_lng":lng,"building_lat":lat,"village_id":village_id,"source": "1" },
-                                                        //                dataType: "json",
-                                                        //                success: function (data) {
-                                                        //                    if (data.length !== 0) {
-                                                        //                        console.log('error');
-                                                        //                    } else {
-                                                        //                        //document.getElementsByClassName("modalSmall")[0].remove();
-                                                        //                        console.log('inserted');
-                                                        //                        //$('#dg').datagrid('insertRow', {
-                                                        //                        //    index: 0,
-                                                        //                        //    row: {
-                                                        //                        //        village_name: village_name,
-                                                        //                        //        village_address: village_address,
-                                                        //                        //        village_region: village_region,
-                                                        //                        //        village_type: village_type
-                                                        //                        //    }
-                                                        //                        //});
-
-
-                                                        //                    }
-                                                        //                },
-                                                        //                error: function (item, err) {
-                                                        //                    console.log(err);
-                                                        //                }
-                                                        //            });
-                                                        //    },
-                                                        //    error: function () {
-                                                        //        console.log('error');
-                                                        //    }
-                                                        //});
-
-
-                                                    });
-                                                },
-                                                error: function () {
-                                                    console.log('error');
-                                                }
-                                            });
-                                        }
-                                    }
-                                },
-                                error: function () {
-                                    console.log('error');
-                                }
-                            });
-                        }
-                    },
-                    error: function () {
-                        console.log('error');
+                map.clearMap();
+                $("#dg").datagrid({
+                    url: `./API/SearchByRegion?text=${textSearch}&region=${region}`,
+                    method: 'get',
+                    onLoadSuccess: function (data) {
+                        document.getElementsByClassName('datagrid-row')[0].click();
+                    }
+                });
+            } else if (province !== "全部" && city !== "全部" && county === "全部") {
+                map.clearMap();
+                $("#dg").datagrid({
+                    url: `./api/SearchByCity?text=${textSearch}&city=${city}`,
+                    method: 'get',
+                    onLoadSuccess: function (data) {
+                        document.getElementsByClassName('datagrid-row')[0].click();
                     }
                 });
             }
         }
 
+        //获取小区
         function getVillage(e) {
             var selectP = document.getElementById('selectProvince');
             var selectC = document.getElementById('selectCity');
@@ -624,102 +502,92 @@
             }
         }
 
-        function drawPolygon() {
-            mousetool.polygon({
-                strokeColor: "#FF33FF",
-                strokeOpacity: 1,
-                strokeWeight: 6,
-                strokeOpacity: 0.2,
-                fillColor: '#1791fc',
-                fillOpacity: 0.4,
-                // 线样式还支持 'dashed'
-                strokeStyle: "solid",
-                // strokeStyle是dashed时有效
-                // strokeDasharray: [30,10],
-            });
-    }
-
-    function drawMarker() {
-         var icon = new AMap.Icon({
-                                    size: new AMap.Size(15, 15),
-                                    image: './icons/circle.png',  // Icon的图像
-                                    imageSize: new AMap.Size(15, 15)
-                                });
-            mousetool.marker({
-                                    icon: icon // 添加 Icon 图标 URL
-            });
-        }
-
-        function addVillage(e) {
-            document.getElementById('cb').checked = false;
-            form.render('checkbox');
-            mousetool.close(true);
-            var errors = document.getElementsByClassName("clRedError");
-            for (var i = 0; i < errors.length; i++) {
-                errors[i].remove();
-            }
-            if (document.getElementById('fieldHidden').value === "") {
-                var div = document.createElement('div');
-                div.classList.add("clRedError");
-                div.innerHTML += `<p class="mb-5">请输入边界</p>`;
-                e.appendChild(div);
-            } else {
-                var inputs = e.getElementsByTagName('input');
-                var selects = e.getElementsByTagName('select');
-                var village_name = inputs[0].value;
-                var village_address = inputs[1].value;
-                var village_region = $('#selectProvinceTemp').find(":selected").text() + '/' + $('#selectCityTemp').find(":selected").text() + '/' + $('#selectCountyTemp').find(":selected").text();
-                var village_type = selects[3].value;
-                var village_bounds = document.getElementById('fieldHidden').value;
-                var village_x = String(JSON.parse(document.getElementById('fieldHidden').value)[0][0]);
-                var village_y = String(JSON.parse(document.getElementById('fieldHidden').value)[0][1]);
-                var village_lng = String(JSON.parse(document.getElementById('fieldHidden').value)[0][0]);
-                var village_lat = String(JSON.parse(document.getElementById('fieldHidden').value)[0][1]);
-                var source = "自建";
-                $.ajax({
-                    type: "post",
-                    url: `./API/CreateVillage`,
-                    data: { "village_name": village_name, "village_address": village_address, "village_region": village_region, "village_type": village_type, "village_bounds": village_bounds, "village_x": village_x, "village_y": village_y, "village_lng": village_lng, "village_lat": village_lat, "source": source },
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.length !== 0) {
-                            var div = document.createElement('div');
-                            div.classList.add("clRedError");
-                            data.forEach(function (error) {
-                                div.innerHTML += `<p class="mb-5">${error}</p>`;
-                            })
-                            e.appendChild(div);
-                        } else {
-                            layer.closeAll();
-                            layer.msg("小区已添加");
-                            $('#dg').datagrid('reload'); 
-                        }
-                    },
-                    error: function (item, err) {
-                        console.log(err);
-                    }
-                });
-            }
-        }
-
+        //添加小区
         function newVillage(e) {
-            mousetool.close(true);
-            var optionsProvince = document.getElementById('selectProvince').innerHTML;
-            var optionsCity = document.getElementById('selectCity').innerHTML;
-            var optionsCounty = document.getElementById('selectCounty').innerHTML;
-            var selectProvince = `<select id="selectProvinceTemp" required>` + optionsProvince.slice(28) + `</select>`;
-            var selectCity = `<select id="selectCityTemp" required>` + optionsCity.slice(28) + `</select>`;
-            var selectCounty = `<select id="selectCountyTemp" required>` + optionsCounty.slice(28) + `</select>`;
-             var province = $("#selectProvince").find("option:selected").text();
+            var province = $("#selectProvince").find("option:selected").text();
             var city = $("#selectCity").find("option:selected").text();
             var county = $("#selectCounty").find("option:selected").text();
-            if (province !== "全部" && city !== "全部" && county !== "全部") {
-                   layer.open({
-                btn: [],
-                maxWidth: 750,
-                shade: 0,
-                title: "新建小区",
-                content: `
+            if (province === "全部" || city === "全部" || county === "全部") {
+                layer.msg("请选择省份,城市,和区县");
+            } else {
+                var optionsProvince = document.getElementById('selectProvince').innerHTML.split("><");
+                var optionsCity = document.getElementById('selectCity').innerHTML.split("><");
+                var optionsCounty = document.getElementById('selectCounty').innerHTML.split("><");
+                var selectedProvince = $("#selectProvince").find("option:selected").text();
+                var selectedCity = $("#selectCity").find("option:selected").text();
+                var selectedCounty = $("#selectCounty").find("option:selected").text();
+                var optionsProvinceF = "";
+                var optionsCityF = "";
+                var optionsCountyF = "";
+                for (var i = 0; i < optionsProvince.length; i++) {
+                    if (i !== 0) {
+                        if (i !== optionsProvince.length - 1) {
+                            if (optionsProvince[i].split('>')[1].split('<')[0] === selectedProvince) {
+                                optionsProvinceF += "<" + optionsProvince[i].split('>')[0] + `selected="">` + optionsProvince[i].split('>')[1] + ">";
+                            } else {
+                                optionsProvinceF += "<" + optionsProvince[i] + ">";
+                            }
+                        } else {
+                            if (optionsProvince[i].split('>')[1].split('<')[0] === selectedProvince) {
+                                optionsProvinceF += "<" + optionsProvince[i].split('>')[0] + `selected="">` + optionsProvince[i].split('>')[1];
+                            } else {
+                                optionsProvinceF += "<" + optionsProvince[i];
+                            }
+                        }
+                    }
+                }
+                for (var i = 0; i < optionsCity.length; i++) {
+                    if (i !== 0) {
+                        if (i !== optionsCity.length - 1) {
+                            if (optionsCity[i].split('>')[1].split('<')[0] === selectedCity) {
+                                optionsCityF += "<" + optionsCity[i].split('>')[0] + `selected="">` + optionsCity[i].split('>')[1] + ">";
+                            } else {
+                                optionsCityF += "<" + optionsCity[i] + ">";
+                            }
+                        } else {
+                            if (optionsCity[i].split('>')[1].split('<')[0] === selectedCity) {
+                                optionsCityF += "<" + optionsCity[i].split('>')[0] + `selected="">` + optionsCity[i].split('>')[1];
+                            } else {
+                                optionsCityF += "<" + optionsCity[i];
+                            }
+                        }
+
+                    }
+                }
+                for (var i = 0; i < optionsCounty.length; i++) {
+                    if (i !== 0) {
+                        if (i !== optionsCounty.length - 1) {
+                            if (optionsCounty[i].split('>')[1].split('<')[0] === selectedCounty) {
+                                optionsCountyF += "<" + optionsCounty[i].split('>')[0] + `selected="">` + optionsCounty[i].split('>')[1] + ">";
+                            } else {
+                                optionsCountyF += "<" + optionsCounty[i] + ">";
+                            }
+                        } else {
+                            if (optionsCounty[i].split('>')[1].split('<')[0] === selectedCounty) {
+                                optionsCountyF += "<" + optionsCounty[i].split('>')[0] + `selected="">` + optionsCounty[i].split('>')[1];
+                            } else {
+                                optionsCountyF += "<" + optionsCounty[i];
+                            }
+                        }
+
+                    }
+                }
+                var selectProvince = `<select id="selectProvinceTemp" required>` + optionsProvinceF + `</select>`;
+                var selectCity = `<select id="selectCityTemp" required>` + optionsCityF + `</select>`;
+                var selectCounty = `<select id="selectCountyTemp" required>` + optionsCountyF + `</select>`;
+                var province = $("#selectProvince").find("option:selected").text();
+                var city = $("#selectCity").find("option:selected").text();
+                var county = $("#selectCounty").find("option:selected").text();
+                if (province !== "全部" && city !== "全部" && county !== "全部") {
+                    layer.open({
+                        btn: [],
+                        maxWidth: 750,
+                        shade: 0,
+                        title: "新建小区",
+                        end: function () {
+                            mousetool.close(true);
+                        },
+                        content: `
                   <form class="layui-form layui-form-pane" action="" onsubmit="event.preventDefault();addVillage(this);">
    <div class="layui-form-item">
     <label class="layui-form-label">小区名称</label>
@@ -765,150 +633,73 @@
    </div>
    <button type="submit" class="layui-btn layui-btn-normal fr">保存</button>
   </form>`
-            });
-            form.render();
-            form.on('switch(switchT)', function (data) {
-                if (data.elem.checked) {
-                    drawPolygon();
-                } else {
-                    mousetool.close(true);
+                    });
+                    form.render();
+                    form.on('switch(switchT)', function (data) {
+                        if (data.elem.checked) {
+                            drawPolygon();
+                        } else {
+                            mousetool.close(true);
+                        }
+                    });
                 }
-            });
             }
 
-         
         }
 
-
-
-        function addBuilding(e) {
+        function addVillage(e) {
+            document.getElementById('cb').checked = false;
+            form.render('checkbox');
+            mousetool.close(true);
             var errors = document.getElementsByClassName("clRedError");
             for (var i = 0; i < errors.length; i++) {
                 errors[i].remove();
             }
-            var inputs = e.getElementsByTagName('input');
-            var selects = e.getElementsByTagName('select');
-            var building_number = inputs[0].value;
-            var building_name = inputs[1].value;
-            var building_address = inputs[2].value;
-            var bluelabel = inputs[3].value;
-            var building_region = $('#selectProvinceTemp').find(":selected").text() + '/' + $('#selectCityTemp').find(":selected").text() + '/'+ $('#selectCountyTemp').find(":selected").text();
-            var building_type = selects[3].value;
-            var building_lng = document.getElementById('fieldHidden').value.split(" ")[0];
-            var building_lat = document.getElementById('fieldHidden').value.split(" ")[1];
-            var village_id = document.getElementById('fieldHidden2').value;
-            var source = "自建";
-            $.ajax({
-                type: "post",
-                url: `./API/CreateBuilding`,
-                data: { "building_number": building_number, "building_name": building_name, "building_address": building_address, "bluelabel": bluelabel, "building_region": building_region, "building_type": building_type, "building_lng": building_lng, "building_lat": building_lat, "village_id": village_id, "source": source },
-                dataType: "json",
-                success: function (data) {
-                    if (data.length !== 0) {
-                        var div = document.createElement('div');
-                        div.classList.add("clRedError");
-                        data.forEach(function (error) {
-                            div.innerHTML += `<p class="mb-5">${error}</p>`;
-                        })
-                        e.appendChild(div);
-                    } else {
-                        layer.closeAll();
-                        layer.msg("楼宇已添加");
-                        $('#dg2').datagrid('reload'); 
+            if (document.getElementById('fieldHidden').value === "") {
+                var div = document.createElement('div');
+                div.classList.add("clRedError");
+                div.innerHTML += `<p class="mb-5">请输入边界</p>`;
+                e.appendChild(div);
+            } else {
+                var inputs = e.getElementsByTagName('input');
+                var selects = e.getElementsByTagName('select');
+                var village_name = inputs[0].value;
+                var village_address = inputs[1].value;
+                var village_region = $('#selectProvinceTemp').find(":selected").text() + '/' + $('#selectCityTemp').find(":selected").text() + '/' + $('#selectCountyTemp').find(":selected").text();
+                var village_type = selects[3].value;
+                var village_bounds = document.getElementById('fieldHidden').value;
+                var village_x = String(JSON.parse(document.getElementById('fieldHidden').value)[0][0]);
+                var village_y = String(JSON.parse(document.getElementById('fieldHidden').value)[0][1]);
+                var village_lng = String(JSON.parse(document.getElementById('fieldHidden').value)[0][0]);
+                var village_lat = String(JSON.parse(document.getElementById('fieldHidden').value)[0][1]);
+                var source = "自建";
+                $.ajax({
+                    type: "post",
+                    url: `./API/CreateVillage`,
+                    data: { "village_name": village_name, "village_address": village_address, "village_region": village_region, "village_type": village_type, "village_bounds": village_bounds, "village_x": village_x, "village_y": village_y, "village_lng": village_lng, "village_lat": village_lat, "source": source },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.length !== 0) {
+                            var div = document.createElement('div');
+                            div.classList.add("clRedError");
+                            data.forEach(function (error) {
+                                div.innerHTML += `<p class="mb-5">${error}</p>`;
+                            })
+                            e.appendChild(div);
+                        } else {
+                            layer.closeAll();
+                            layer.msg("小区已添加");
+                            $('#dg').datagrid('reload');
+                        }
+                    },
+                    error: function (item, err) {
+                        console.log(err);
                     }
-                },
-                error: function (item, err) {
-                    console.log(err);
-                }
-            });
-        }
-
-        function newBuilding(e) {
-            mousetool.close(true);
-            var villageSelected = $('#dg').datagrid('getSelected');
-            if (villageSelected !== null) {
-                var villageId = villageSelected.VILLAGE_ID;
-                var optionsProvince = document.getElementById('selectProvince').innerHTML;
-                var optionsCity = document.getElementById('selectCity').innerHTML;
-                var optionsCounty = document.getElementById('selectCounty').innerHTML;
-                var selectProvince = `<select id="selectProvinceTemp" required>` + optionsProvince.slice(28) + `</select>`;
-                var selectCity = `<select id="selectCityTemp" required>` + optionsCity.slice(28) + `</select>`;
-                var selectCounty = `<select id="selectCountyTemp" required>` + optionsCounty.slice(28) + `</select>`;
-                layer.open({
-                    btn: [],
-                    maxWidth: 750,
-                    shade: 0,
-                    title: "新建楼宇",
-                    content: `<form class="layui-form layui-form-pane" action="" onsubmit="event.preventDefault();addBuilding(this);">
-                   <div class="layui-form-item">
-                    <label class="layui-form-label">楼宇号码</label>
-                <div class="layui-input-block">
-                      <input type="text" name="building_number" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required>
-                    </div>
-                  </div>
-              <div class="layui-form-item">
-                    <label class="layui-form-label">楼宇名称</label>
-                <div class="layui-input-block">
-                      <input type="text" name="building_name" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required>
-                    </div>
-                  </div>
-                  <div class="layui-form-item">
-                    <label class="layui-form-label">详细地址</label>
-                <div class="layui-input-block">
-                      <input type="text" name="building_address" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required>
-                    </div>
-                  </div>
- <div class="layui-form-item">
-                    <label class="layui-form-label">蓝牌地址码</label>
-                <div class="layui-input-block">
-                      <input type="text" name="bluelabel" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required>
-                    </div>
-                  </div>
-       <div class="layui-form-item">
-    <label class="layui-form-label">区域</label>
-    <div class="layui-input-inline">` + selectProvince + `</div><div class="layui-input-inline">` + selectCity + `</div><div class="layui-input-inline">` + selectCounty +
-                        `</select></div></div>
-
-<div class="layui-form-item">
-                <label class="layui-form-label">类型</label>
-                <div class="layui-input-block">
-                  <select name="type" lay-filter="aihao" required>
-                    <option value="地名地址信息;门牌信息;楼栋号">地名地址信息;门牌信息;楼栋号</option>
-                  </select>
-                </div>
-              </div>
-   <div class="layui-form-item hidden">
-    <label class="layui-form-label"></label>
-    <div class="layui-input-inline">
-     <input type="text" id="fieldHidden" name="building_lnglat" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" />
-    </div>
-   </div>
- <div class="layui-form-item hidden">
-    <label class="layui-form-label"></label>
-    <div class="layui-input-inline">
-     <input type="text" id="fieldHidden2" name="building_lnglat" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" value="` + villageId + `"/>
-    </div>
-   </div>
-<div class="layui-form-item">
-    <label class="layui-form-label">添加位置</label>
-    <div class="layui-input-block">
-     <input type="checkbox" name="close" lay-skin="switch" lay-text="是|否" lay-filter="switchT" id="cb" />
-    </div>
-   </div>
- <button type="submit" class="layui-btn layui-btn-normal fr">保存</button>
-</form>`
                 });
-                  form.render();
-            form.on('switch(switchT)', function (data) {
-                if (data.elem.checked) {
-                    drawMarker();
-                } else {
-                    mousetool.close(true);
-                }
-            });
             }
         }
 
+        //小区详情
         function getPoiDetail(e) {
             var dataGuid = e.getAttribute("data-guid");
             $.ajax({
@@ -932,142 +723,7 @@
             });
         }
 
-        function getPoiDetail2(e) {
-            var dataGuid = e.getAttribute("data-guid");
-            $.ajax({
-                type: "get",
-                url: `./API/DetailsBuilding?id=${dataGuid}`,
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function (data) {
-                    layer.open({
-                        btn: [],
-                        move: false,
-                        offset: ['100px', '80%'],
-                        shade: 0,
-                        title: "楼宇信息",
-                        content: `<div class="mb-10"><span class="mr-5 bold">楼宇名称:</span><span>${data["ds"][0]["BUILDING_NAME"]}</span></div><div  class="mb-10"><span class="mr-5 bold">详细地址:</span><span>${data["ds"][0]["BUILDING_ADDRESS"]}</span></div><div  class="mb-10"><span class="mr-5 bold">蓝牌地址码:</span><span>${data["ds"][0]["BLUELABEL"]}</span></div><div  class="mb-10"><span class="mr-5 bold">区域:</span><span>${data["ds"][0]["REGION"]}</span></div><div  class="mb-10"><span class="mr-5 bold">类型:</span><span>${data["ds"][0]["TYPE"]}</span></div>`
-                    });
-                },
-                error: function (item, err) {
-                    console.log(err);
-                }
-            });
-        }
-
-        function editPoiBounds(e) {
-            document.getElementById('cb').checked = false;
-            form.render('checkbox');
-            mousetool.close(true);
-            var errors = document.getElementsByClassName("clRedError");
-            for (var i = 0; i < errors.length; i++) {
-                errors[i].remove();
-            }
-            if (document.getElementById('fieldHidden').value === "") {
-                var div = document.createElement('div');
-                div.classList.add("clRedError");
-                div.innerHTML += `<p class="mb-5">请输入边界</p>`;
-                e.appendChild(div);
-            } else {
-                var inputs = e.getElementsByTagName('input');
-                var village_name = inputs[0].value;
-                var village_address = inputs[1].value;
-                var village_region = inputs[2].value;
-                var village_type = inputs[3].value;
-                var village_bounds = document.getElementById('fieldHidden').value;
-                var dataGuid = e.getAttribute("data-guid");
-                $.ajax({
-                    type: "post",
-                    url: `./API/EditVillageBounds?id=${dataGuid}`,
-                    data: { "village_name": village_name, "village_address": village_address, "village_region": village_region, "village_type": village_type, "village_bounds": village_bounds },
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.length !== 0) {
-                            var div = document.createElement('div');
-                            div.classList.add("clRedError");
-                            data.forEach(function (error) {
-                                div.innerHTML += `<p class="mb-5">${error}</p>`;
-                            })
-                            e.appendChild(div);
-                        } else {
-                            layer.closeAll();
-                            layer.msg("小区已编辑");
-                            $('#dg').datagrid('reload'); 
-                            //$('#dg').datagrid('updateRow', {
-                            //    index: document.getElementsByTagName("body")[0].getAttribute("data-currentindex"),
-                            //    row: {
-                            //        village_name: village_name,
-                            //        village_address: village_address,
-                            //        village_region: village_region,
-                            //        village_type: village_type
-                            //    }
-                            //});
-                        }
-
-                    },
-                    error: function (item, err) {
-                        console.log(err);
-                    }
-                });
-            }
-        }
-
-        function editPoiBounds2(e) {
-            document.getElementById('cb').checked = false;
-            form.render('checkbox');
-            var polygon = map.getAllOverlays("polygon")[0];
-            polygon.getExtData()["editor"].close();
-            var errors = document.getElementsByClassName("clRedError");
-            for (var i = 0; i < errors.length; i++) {
-                errors[i].remove();
-            }
-            var inputs = e.getElementsByTagName('input');
-            var village_name = inputs[0].value;
-            var village_address = inputs[1].value;
-            var village_region = inputs[2].value;
-            var village_type = inputs[3].value;
-            village_bounds = "[";
-            polygon.getPath().forEach(function (coord) {
-                village_bounds += `[${String(coord["lng"])},${String(coord["lat"])}],`;
-            });
-            village_bounds = village_bounds.slice(0, village_bounds.length - 1);
-            village_bounds += "]";
-            var dataGuid = e.getAttribute("data-guid");
-            $.ajax({
-                type: "post",
-                url: `./API/EditVillageBounds?id=${dataGuid}`,
-                data: { "village_name": village_name, "village_address": village_address, "village_region": village_region, "village_type": village_type, "village_bounds": village_bounds },
-                dataType: "json",
-                success: function (data) {
-                    if (data.length !== 0) {
-                        var div = document.createElement('div');
-                        div.classList.add("clRedError");
-                        data.forEach(function (error) {
-                            div.innerHTML += `<p class="mb-5">${error}</p>`;
-                        })
-                        e.appendChild(div);
-                    } else {
-                        layer.closeAll();
-                        layer.msg("小区已编辑");
-                        $('#dg').datagrid('reload'); 
-                        //$('#dg').datagrid('updateRow', {
-                        //    index: document.getElementsByTagName("body")[0].getAttribute("data-currentindex"),
-                        //    row: {
-                        //        village_name: village_name,
-                        //        village_address: village_address,
-                        //        village_region: village_region,
-                        //        village_type: village_type
-                        //    }
-                        //});
-                    }
-
-                },
-                error: function (item, err) {
-                    console.log(err);
-                }
-            });
-        }
-
+        //编辑小区
         function editPoi(e) {
             var dataGuid = e.getAttribute("data-guid");
             $.ajax({
@@ -1081,6 +737,9 @@
                             btn: [],
                             shade: 0,
                             title: "编辑小区",
+                            end: function () {
+                                mousetool.close(true);
+                            },
                             content: `<form class="layui-form layui-form-pane" action="" onsubmit="event.preventDefault();editPoiBounds(this);" data-guid=${dataGuid}>
                    <div class="layui-form-item">
                     <label class="layui-form-label">小区名称</label>
@@ -1140,6 +799,9 @@
                             btn: [],
                             shade: 0,
                             title: "编辑小区",
+                            end: function () {
+                                polygon.getExtData()["editor"].close();
+                            },
                             content: `<form class="layui-form layui-form-pane" action=""  onsubmit="event.preventDefault();editPoiBounds2(this);" data-guid=${dataGuid}>
                    <div class="layui-form-item">
                     <label class="layui-form-label">小区名称</label>
@@ -1155,6 +817,7 @@
                   </div>
               <div class="layui-form-item">
                 <label class="layui-form-label">区域</label>
+              <div class="layui-input-block">
               <div class="layui-input-block">
                   <select name="region" required>
                             <option value="` + data["ds"][0]["VILLAGE_REGION"] + `">` + data["ds"][0]["VILLAGE_REGION"] + `
@@ -1192,10 +855,6 @@
                                 polygon.getExtData()["editor"].close();
                             }
                         });
-                        //document.getElementsByTagName('form')[0].addEventListener('submit', function (e) {
-                        //    event.preventDefault();
-                        //    editPoiBounds2(e.target, polygon);
-                        //});
                     }
                 },
                 error: function (item, err) {
@@ -1204,23 +863,79 @@
             });
         }
 
-        function editPoiBuilding(e) {
+        function editPoiBounds(e) {
+            document.getElementById('cb').checked = false;
+            form.render('checkbox');
+            mousetool.close(true);
+            var errors = document.getElementsByClassName("clRedError");
+            for (var i = 0; i < errors.length; i++) {
+                errors[i].remove();
+            }
+            if (document.getElementById('fieldHidden').value === "") {
+                var div = document.createElement('div');
+                div.classList.add("clRedError");
+                div.innerHTML += `<p class="mb-5">请输入边界</p>`;
+                e.appendChild(div);
+            } else {
+                var inputs = e.getElementsByTagName('input');
+                var village_name = inputs[0].value;
+                var village_address = inputs[1].value;
+                var village_region = inputs[2].value;
+                var village_type = inputs[3].value;
+                var village_bounds = document.getElementById('fieldHidden').value;
+                var dataGuid = e.getAttribute("data-guid");
+                $.ajax({
+                    type: "post",
+                    url: `./API/EditVillageBounds?id=${dataGuid}`,
+                    data: { "village_name": village_name, "village_address": village_address, "village_region": village_region, "village_type": village_type, "village_bounds": village_bounds },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.length !== 0) {
+                            var div = document.createElement('div');
+                            div.classList.add("clRedError");
+                            data.forEach(function (error) {
+                                div.innerHTML += `<p class="mb-5">${error}</p>`;
+                            })
+                            e.appendChild(div);
+                        } else {
+                            layer.closeAll();
+                            layer.msg("小区已编辑");
+                            $('#dg').datagrid('reload');
+                        }
+
+                    },
+                    error: function (item, err) {
+                        console.log(err);
+                    }
+                });
+            }
+        }
+
+        function editPoiBounds2(e) {
+            document.getElementById('cb').checked = false;
+            form.render('checkbox');
+            var polygon = map.getAllOverlays("polygon")[0];
+            polygon.getExtData()["editor"].close();
             var errors = document.getElementsByClassName("clRedError");
             for (var i = 0; i < errors.length; i++) {
                 errors[i].remove();
             }
             var inputs = e.getElementsByTagName('input');
-            var building_number = inputs[0].value;
-            var building_name = inputs[1].value;
-            var building_address = inputs[2].value
-            var bluelabel =  inputs[3].value
-            var building_region = inputs[4].value;
-            var building_type = inputs[5].value;
+            var village_name = inputs[0].value;
+            var village_address = inputs[1].value;
+            var village_region = inputs[2].value;
+            var village_type = inputs[3].value;
+            village_bounds = "[";
+            polygon.getPath().forEach(function (coord) {
+                village_bounds += `[${String(coord["lng"])},${String(coord["lat"])}],`;
+            });
+            village_bounds = village_bounds.slice(0, village_bounds.length - 1);
+            village_bounds += "]";
             var dataGuid = e.getAttribute("data-guid");
             $.ajax({
                 type: "post",
-                url: `./API/EditBuilding?id=${dataGuid}`,
-                data: { "building_number": building_number, "building_name": building_name, "building_address": building_address, "bluelabel": bluelabel, "building_region": building_region, "building_type": building_type },
+                url: `./API/EditVillageBounds?id=${dataGuid}`,
+                data: { "village_name": village_name, "village_address": village_address, "village_region": village_region, "village_type": village_type, "village_bounds": village_bounds },
                 dataType: "json",
                 success: function (data) {
                     if (data.length !== 0) {
@@ -1232,15 +947,8 @@
                         e.appendChild(div);
                     } else {
                         layer.closeAll();
-                        layer.msg("楼宇已编辑");
-                        $('#dg2').datagrid('reload'); 
-                        //$('#dg2').datagrid('updateRow', {
-                        //    index: document.getElementsByTagName("body")[0].getAttribute("data-currentindex"),
-                        //    row: {
-                        //        building_name: building_name,
-                        //        building_address: building_address
-                        //    }
-                        //});
+                        layer.msg("小区已编辑");
+                        $('#dg').datagrid('reload');
                     }
                 },
                 error: function (item, err) {
@@ -1249,6 +957,363 @@
             });
         }
 
+        //删除小区
+        function deletePoi(e) {
+            var dataGuid = e.getAttribute("data-guid");
+            layer.open({
+                btn: [],
+                shade: 0,
+                title: "删除小区",
+                content: `<div><div class="mb-15 tc">确定删除小区?</div><div class="tr"><button type="submit" class="layui-btn layui-btn-danger" data-guid=${dataGuid} onclick="deletePoiFinal(this);">删除</button></div></div>`
+            });
+        }
+
+        function deletePoiFinal(e) {
+            var dataGuid = e.getAttribute("data-guid");
+            $.ajax({
+                type: "post",
+                url: `./API/DeleteVillage?id=${dataGuid}`,
+                dataType: "json",
+                success: function (data) {
+                    if (data.length !== 0) {
+                        console.log('error');
+                    } else {
+                        layer.closeAll();
+                        layer.msg("小区已删除");
+                        $('#dg').datagrid('reload');
+                    }
+                },
+                error: function (item, err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        //搜索楼宇
+        function searchBuilding(e) {
+            var textSearch = document.getElementById("inputSearchBuilding").value;
+            var villageSelected = $('#dg').datagrid('getSelected');
+            if (villageSelected !== null) {
+                $("#dg2").datagrid({
+                    url: `./API/GetBuildingsPaginatedSearch?text=${textSearch}&villageid=${villageSelected.VILLAGE_ID}`,
+                    method: 'get',
+                    onLoadSuccess: function (data) {
+
+                        //$("#dg").datagrid('selectRow',0);
+                    }
+                });
+            }
+        }
+
+        //获取楼宇
+        function getBuildingNumber(str) {
+            var r = str.match(/[a-zA-Z]/);
+            if (r !== null) {
+                return str.slice(r["index"]);
+            } else {
+                var r2 = str.match(/\d/);
+                if (r2 !== null) {
+                    return str.slice(r2["index"]);
+                } else {
+                    return str;
+                }
+            }
+        }
+
+        function getBuilding(e) {
+            var selectP = document.getElementById('selectProvince');
+            var selectC = document.getElementById('selectCity');
+            var selectCT = document.getElementById('selectCounty');
+            var province = $("#selectProvince").find("option:selected").text();
+            var city = $("#selectCity").find("option:selected").text();
+            var county = $("#selectCounty").find("option:selected").text();
+            var adcode = document.getElementById('selectCounty').value;
+            var region = province + "/" + city + "/" + county;
+            if (province !== "全部" && city !== "全部" && county !== "全部") {
+                $.ajax({
+                    type: "get",
+                    url: `./api/regionexists2?region=${region}`,
+                    dataType: "json",
+                    success: function (data) {
+                        if (data["ds"][0]["COUNT"] === 0) {
+                            $.ajax({
+                                type: "get",
+                                url: `https://restapi.amap.com/v3/place/text?key=c7aeb11746b35a92b7b6eee3178a05e4&keywords=&types=190403&city=${adcode}&children=1&offset=5&page=1&extensions=all`,
+                                dataType: "json",
+                                success: function (data) {
+                                    var count = data["count"];
+                                    var times = 0;
+                                    if (count !== 0) {
+                                        //  var piece = 100 / count;
+                                        //var currentP = 0;
+                                        //var currentCount = 0;
+                                        var div = document.createElement('div');
+                                        div.setAttribute('id', 'pb');
+                                        div.innerHTML += `<div class="layui-progress layui-progress-big layui-bg-orange" lay-filter="pb" lay-showpercent="true"">
+  <div class="layui-progress-bar" lay-percent="0%"></div>
+</div>`;
+                                        document.getElementsByTagName('body')[0].appendChild(div);
+
+                                        var currentP = 10;
+                                        //  set your counter to 1
+
+                                        function myLoop() {           //  create a loop function
+                                            setTimeout(function () {    //  call a 3s setTimeout when the loop is called
+                                                element.progress('pb', `${String(currentP)}%`);
+
+
+                                                currentP += 10;                    //  increment the counter
+                                                if (currentP <= 100) {            //  if the counter < 10, call the loop function
+                                                    myLoop();             //  ..  again which will trigger another
+                                                } else {
+                                                    document.getElementById('pb').remove(); layer.msg("楼宇已更新");
+                                                }//  ..  setTimeout()
+                                            }, 1000)
+                                        }
+
+                                        myLoop();
+                                        times = Math.ceil(count / 20);
+                                        console.log(count);
+                                        for (var i = 0; i < times; i++) {
+                                            var page = i + 1;
+                                            console.log('this is page' + page);
+                                            $.ajax({
+                                                type: "get",
+                                                url: `https://restapi.amap.com/v3/place/text?key=c7aeb11746b35a92b7b6eee3178a05e4&keywords=&types=190403&city=${adcode}&children=1&offset=20&page=${page}&extensions=all`,
+                                                dataType: "json",
+                                                success: function (data2) {
+                                                    console.log(data2);
+                                                    data2["pois"].forEach(function (poi) {
+                                                        // currentP += piece;
+                                                        //currentCount += 1;
+                                                        //                                                        console.log(currentCount);
+
+                                                        //var cP = `${String(currentP)}%`;
+                                                        //element.progress('pb', cP);
+                                                        //if (currentCount === Number(count)) {
+                                                        //    setTimeout(function () { document.getElementById('pb').remove();layer.msg("楼宇已更新");},1500);
+                                                        //}
+                                                        var region = `${poi["pname"]}/${poi["cityname"]}/${poi["adname"]}`;
+                                                        var lnglat = poi["location"];
+                                                        var lng = Number(lnglat.split(',')[0]);
+                                                        var lat = Number(lnglat.split(',')[1]);
+                                                        var building_number = getBuildingNumber(poi["name"]);
+                                                        $.ajax({
+                                                            type: "post",
+                                                            url: `./API/CreateBuildings`,
+                                                            data: { "building_code": poi["id"], "building_number": building_number, "building_name": poi["name"], "building_address": poi["address"], "building_region": region, "building_type": poi["type"], "building_x": lng, "building_y": lat, "building_lng": lng, "building_lat": lat, "village_id": poi["parent"], "source": "高德" },
+                                                            dataType: "json",
+                                                            success: function (data) {
+                                                                if (data.length !== 0) {
+                                                                    console.log('error');
+                                                                } else {
+                                                                    //document.getElementsByClassName("modalSmall")[0].remove();
+                                                                    console.log('inserted');
+                                                                    //$('#dg').datagrid('insertRow', {
+                                                                    //    index: 0,
+                                                                    //    row: {
+                                                                    //        village_name: village_name,
+                                                                    //        village_address: village_address,
+                                                                    //        village_region: village_region,
+                                                                    //        village_type: village_type
+                                                                    //    }
+                                                                    //});
+
+
+                                                                }
+                                                            },
+                                                            error: function (item, err) {
+                                                                console.log(err);
+                                                            }
+                                                        });
+                                                    });
+                                                },
+                                                error: function () {
+                                                    console.log('error');
+                                                }
+                                            });
+                                        }
+                                    }
+                                },
+                                error: function () {
+                                    console.log('error');
+                                }
+                            });
+                        }
+                    },
+                    error: function () {
+                        console.log('error');
+                    }
+                });
+            }
+        }
+
+        //新建楼宇
+        function newBuilding(e) {
+            var villageSelected = $('#dg').datagrid('getSelected');
+            if (villageSelected !== null) {
+                var villageId = villageSelected.VILLAGE_ID;
+                var villageRegion = villageSelected.VILLAGE_REGION;
+                var optionsProvince = document.getElementById('selectProvince').innerHTML;
+                var optionsCity = document.getElementById('selectCity').innerHTML;
+                var optionsCounty = document.getElementById('selectCounty').innerHTML;
+                var selectProvince = `<select id="selectProvinceTemp" required>` + optionsProvince.slice(28) + `</select>`;
+                var selectCity = `<select id="selectCityTemp" required>` + optionsCity.slice(28) + `</select>`;
+                var selectCounty = `<select id="selectCountyTemp" required>` + optionsCounty.slice(28) + `</select>`;
+                layer.open({
+                    btn: [],
+                    maxWidth: 750,
+                    shade: 0,
+                    end: function () {
+                        mousetool.close(true);
+                    },
+                    title: "新建楼宇",
+                    content: `<form class="layui-form layui-form-pane" action="" onsubmit="event.preventDefault();addBuilding(this);">
+                   <div class="layui-form-item">
+                    <label class="layui-form-label">楼宇号码</label>
+                <div class="layui-input-block">
+                      <input type="text" name="building_number" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required>
+                    </div>
+                  </div>
+              <div class="layui-form-item">
+                    <label class="layui-form-label">楼宇名称</label>
+                <div class="layui-input-block">
+                      <input type="text" name="building_name" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required>
+                    </div>
+                  </div>
+                  <div class="layui-form-item">
+                    <label class="layui-form-label">详细地址</label>
+                <div class="layui-input-block">
+                      <input type="text" name="building_address" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required>
+                    </div>
+                  </div>
+ <div class="layui-form-item">
+                    <label class="layui-form-label">蓝牌地址码</label>
+                <div class="layui-input-block">
+                      <input type="text" name="bluelabel" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required>
+                    </div>
+                  </div>
+ <div class="layui-form-item">
+
+                <label class="layui-form-label">类型</label>
+                <div class="layui-input-block">
+                  <select name="type" lay-filter="aihao" required>
+                    <option value="地名地址信息;门牌信息;楼栋号">地名地址信息;门牌信息;楼栋号</option>
+                  </select>
+                </div>
+              </div>
+ <div id="fieldHidden3" class="layui-form-item hidden">` + villageId + `</div><div id="fieldHidden" class="layui-form-item hidden">` + villageRegion + `</div><div id="fieldHidden2" class="layui-form-item hidden"></div>
+<div class="layui-form-item">
+    <label class="layui-form-label">添加位置</label>
+    <div class="layui-input-block">
+     <input type="checkbox" name="close" lay-skin="switch" lay-text="是|否" lay-filter="switchT" id="cb" />
+    </div>
+   </div>
+ <button type="submit" class="layui-btn layui-btn-normal fr">保存</button>
+</form>`
+                });
+                form.render();
+                form.on('switch(switchT)', function (data) {
+                    if (data.elem.checked) {
+                        drawMarker();
+                    } else {
+                        mousetool.close(true);
+                    }
+                });
+            } else {
+                layer.msg("请选择小区");
+            }
+        }
+
+        function addBuilding(e) {
+            document.getElementById('cb').checked = false;
+            form.render('checkbox');
+            mousetool.close(true);
+            var errors = document.getElementsByClassName("clRedError");
+            for (var i = 0; i < errors.length; i++) {
+                errors[i].remove();
+            }
+            if (document.getElementById('fieldHidden2').innerText === "") {
+                var div = document.createElement('div');
+                div.classList.add("clRedError");
+                div.innerHTML += `<p class="mb-5">请输入位置</p>`;
+                e.appendChild(div);
+            } else {
+                var inputs = e.getElementsByTagName('input');
+                var selects = e.getElementsByTagName('select');
+                var building_number = inputs[0].value;
+                var building_name = inputs[1].value;
+                var building_address = inputs[2].value;
+                var bluelabel = inputs[3].value;
+                //var building_region = $('#selectProvinceTemp').find(":selected").text() + '/' + $('#selectCityTemp').find(":selected").text() + '/'+ $('#selectCountyTemp').find(":selected").text();
+                var building_region = document.getElementById('fieldHidden').innerText;
+                var building_type = selects[0].value;
+                var building_lng = document.getElementById('fieldHidden2').innerText.split(" ")[0];
+                var building_lat = document.getElementById('fieldHidden2').innerText.split(" ")[1];
+                var village_id = document.getElementById('fieldHidden3').innerText;
+                var source = "自建";
+                $.ajax({
+                    type: "post",
+                    url: `./API/CreateBuilding`,
+                    data: { "building_number": building_number, "building_name": building_name, "building_address": building_address, "bluelabel": bluelabel, "building_region": building_region, "building_type": building_type, "building_lng": building_lng, "building_lat": building_lat, "village_id": village_id, "source": source },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.length !== 0) {
+                            var div = document.createElement('div');
+                            div.classList.add("clRedError");
+                            data.forEach(function (error) {
+                                div.innerHTML += `<p class="mb-5">${error}</p>`;
+                            })
+                            e.appendChild(div);
+                        } else {
+                            layer.closeAll();
+                            layer.msg("楼宇已添加");
+                            $('#dg2').datagrid('reload');
+                            var icon = new AMap.Icon({
+                                size: new AMap.Size(15, 15),
+                                image: './icons/circle.png',  // Icon的图像
+                                imageSize: new AMap.Size(15, 15)
+                            });
+                            var marker = new AMap.Marker({
+                                position: new AMap.LngLat(building_lng, building_lat),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+                                title: building_name,
+                                icon: icon // 添加 Icon 图标 URL
+                            });
+                            map.add(marker);
+                        }
+                    },
+                    error: function (item, err) {
+                        console.log(err);
+                    }
+                });
+            }
+        }
+
+        //楼宇详情
+        function getPoiDetail2(e) {
+            var dataGuid = e.getAttribute("data-guid");
+            $.ajax({
+                type: "get",
+                url: `./API/DetailsBuilding?id=${dataGuid}`,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    layer.open({
+                        btn: [],
+                        move: false,
+                        offset: ['100px', '80%'],
+                        shade: 0,
+                        title: "楼宇信息",
+                        content: `<div class="mb-10"><span class="mr-5 bold">楼宇名称:</span><span>${data["ds"][0]["BUILDING_NAME"]}</span></div><div  class="mb-10"><span class="mr-5 bold">详细地址:</span><span>${data["ds"][0]["BUILDING_ADDRESS"]}</span></div><div  class="mb-10"><span class="mr-5 bold">蓝牌地址码:</span><span>${data["ds"][0]["BLUELABEL"]}</span></div><div  class="mb-10"><span class="mr-5 bold">区域:</span><span>${data["ds"][0]["REGION"]}</span></div><div  class="mb-10"><span class="mr-5 bold">类型:</span><span>${data["ds"][0]["TYPE"]}</span></div>`
+                    });
+                },
+                error: function (item, err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        //编辑楼宇
         function editPoi2(e) {
             var dataGuid = e.getAttribute("data-guid");
             $.ajax({
@@ -1261,6 +1326,9 @@
                         btn: [],
                         shade: 0,
                         title: "编辑楼宇",
+                        end: function () {
+                            mousetool.close(true);
+                        },
                         content: `<form class="layui-form layui-form-pane" action="" onsubmit="event.preventDefault();editPoiBuilding(this);" data-guid=${dataGuid}>
                   <div class="layui-form-item">
                     <label class="layui-form-label">楼宇号码</label>
@@ -1302,10 +1370,24 @@
                   </select>
                 </div>
               </div>
+<div id="fieldHidden2" class="layui-form-item hidden"></div>
+<div class="layui-form-item">
+    <label class="layui-form-label">编辑位置</label>
+    <div class="layui-input-block">
+     <input type="checkbox" name="close" lay-skin="switch" lay-text="是|否" lay-filter="switchT" id="cb" />
+    </div>
+   </div>
  <button type="submit" class="layui-btn layui-btn-normal fr">保存</button>
 </form>`
                     });
                     form.render();
+                    form.on('switch(switchT)', function (data) {
+                        if (data.elem.checked) {
+                            drawMarker();
+                        } else {
+                            mousetool.close(true);
+                        }
+                    });
                 },
                 error: function (item, err) {
                     console.log(err);
@@ -1313,26 +1395,81 @@
             });
         }
 
-        function deletePoiFinal(e) {
-            var dataGuid = e.getAttribute("data-guid");
-            $.ajax({
-                type: "post",
-                url: `./API/DeleteVillage?id=${dataGuid}`,
-                dataType: "json",
-                success: function (data) {
-                    if (data.length !== 0) {
-                        console.log('error');
-                    } else {
-                        layer.closeAll();
-                        layer.msg("小区已删除");
-                        $('#dg').datagrid('reload'); 
-                        //var index = document.getElementsByTagName("body")[0].getAttribute("data-currentindex");
-                        //$('#dg').datagrid('deleteRow', index);
+        function editPoiBuilding(e) {
+            document.getElementById('cb').checked = false;
+            form.render('checkbox');
+            mousetool.close(true);
+            var errors = document.getElementsByClassName("clRedError");
+            for (var i = 0; i < errors.length; i++) {
+                errors[i].remove();
+            }
+            if (document.getElementById('fieldHidden2').innerText === "") {
+                var div = document.createElement('div');
+                div.classList.add("clRedError");
+                div.innerHTML += `<p class="mb-5">请输入位置</p>`;
+                e.appendChild(div);
+            } else {
+                var inputs = e.getElementsByTagName('input');
+                var building_number = inputs[0].value;
+                var building_name = inputs[1].value;
+                var building_address = inputs[2].value
+                var bluelabel = inputs[3].value
+                var building_region = inputs[4].value;
+                var building_type = inputs[5].value;
+                var building_lng = document.getElementById('fieldHidden2').innerText.split(" ")[0];
+                var building_lat = document.getElementById('fieldHidden2').innerText.split(" ")[1];
+                var dataGuid = e.getAttribute("data-guid");
+                $.ajax({
+                    type: "post",
+                    url: `./API/EditBuilding?id=${dataGuid}`,
+                    data: { "building_number": building_number, "building_name": building_name, "building_address": building_address, "bluelabel": bluelabel, "building_region": building_region, "building_type": building_type, "building_lng": building_lng, "building_lat": building_lat },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.length !== 0) {
+                            var div = document.createElement('div');
+                            div.classList.add("clRedError");
+                            data.forEach(function (error) {
+                                div.innerHTML += `<p class="mb-5">${error}</p>`;
+                            })
+                            e.appendChild(div);
+                        } else {
+                            layer.closeAll();
+                            layer.msg("楼宇已编辑");
+                            $('#dg2').datagrid('reload');
+                            var markers = map.getAllOverlays("marker");
+                            var icon = new AMap.Icon({
+                                size: new AMap.Size(15, 15),
+                                image: './icons/circle1.png',  // Icon的图像
+                                imageSize: new AMap.Size(15, 15)
+                            });
+                            markers.forEach(function (marker) {
+                                if (marker.getIcon().B.image === "./icons/circle1.png") {
+                                    map.remove(marker);
+                                }
+                            });
+                            var marker = new AMap.Marker({
+                                position: new AMap.LngLat(building_lng, building_lat),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+                                title: building_name,
+                                icon: icon // 添加 Icon 图标 URL
+                            });
+                            map.add(marker);
+                        }
+                    },
+                    error: function (item, err) {
+                        console.log(err);
                     }
-                },
-                error: function (item, err) {
-                    console.log(err);
-                }
+                });
+            }
+        }
+
+        //删除楼宇
+        function deletePoi2(e) {
+            var dataGuid = e.getAttribute("data-guid");
+            layer.open({
+                btn: [],
+                shade: 0,
+                title: "删除楼宇",
+                content: `<div><div class="mb-15 tc">确定删除楼宇?</div><div class="tr"><button type="button" class="layui-btn layui-btn-danger" data-guid=${dataGuid} onclick="deletePoiFinal2(this);">删除</button></div></div>`
             });
         }
 
@@ -1348,9 +1485,13 @@
                     } else {
                         layer.closeAll();
                         layer.msg("楼宇已删除");
-                        $('#dg2').datagrid('reload'); 
-                        //var index = document.getElementsByTagName("body")[0].getAttribute("data-currentindex");
-                        //$('#dg2').datagrid('deleteRow', index);
+                        $('#dg2').datagrid('reload');
+                        var markers = map.getAllOverlays("marker");
+                        markers.forEach(function (marker) {
+                            if (marker.getIcon().B.image === "./icons/circle1.png") {
+                                map.remove(marker);
+                            }
+                        });
                     }
 
                 },
@@ -1360,130 +1501,10 @@
             });
         }
 
-        function deletePoi(e) {
-            var dataGuid = e.getAttribute("data-guid");
-            layer.open({
-                btn: [],
-                shade: 0,
-                title: "删除小区",
-                content: `<div><div class="mb-15 tc">确定删除小区?</div><div class="tr"><button type="submit" class="layui-btn layui-btn-danger" data-guid=${dataGuid} onclick="deletePoiFinal(this);">删除</button></div></div>`
-            });
-        }
 
-        function deletePoi2(e) {
-            var dataGuid = e.getAttribute("data-guid");
-            layer.open({
-                btn: [],
-                shade: 0,
-                title: "删除楼宇",
-                content: `<div><div class="mb-15 tc">确定删除楼宇?</div><div class="tr"><button type="button" class="layui-btn layui-btn-danger" data-guid=${dataGuid} onclick="deletePoiFinal2(this);">删除</button></div></div>`
-            });
-        }
 
-        function searchVillage(e) {
-            var textSearch = document.getElementById("inputSearchVillage").value;
-            var province = $("#selectProvince").find("option:selected").text();
-            var city = $("#selectCity").find("option:selected").text();
-            var county = $("#selectCounty").find("option:selected").text();
-            var region = province + "/" + city + "/" + county;
-            if (province !== "全部" && city !== "全部" && county !== "全部") {
-                map.clearMap();
-                $("#dg").datagrid({
-                    url: `./API/SearchByRegion?text=${textSearch}&region=${region}`,
-                    method: 'get',
-                    onLoadSuccess: function (data) {
-                        document.getElementsByClassName('datagrid-row')[0].click();
-                    }
-                });
-            } else if (province !== "全部" && city !== "全部" && county === "全部") {
-                map.clearMap();
-                $("#dg").datagrid({
-                    url: `./api/SearchByCity?text=${textSearch}&city=${city}`,
-                    method: 'get',
-                    onLoadSuccess: function (data) {
-                        document.getElementsByClassName('datagrid-row')[0].click();
-                    }
-                });
-            }
-        }
 
-        function searchBuilding(e) {
-            var textSearch = document.getElementById("inputSearchBuilding").value;
-            var villageSelected = $('#dg').datagrid('getSelected');
-            if (villageSelected !== null) {
-                    $("#dg2").datagrid({
-                    url: `./API/GetBuildingsPaginatedSearch?text=${textSearch}&villageid=${villageSelected.VILLAGE_ID}`,
-                    method: 'get',
-                    onLoadSuccess: function (data) {
-
-                        //$("#dg").datagrid('selectRow',0);
-                    }
-                });
-            }
-
-            // get selected village and find its buildings and apply filters (all or some) and return json
-            // data and enter into dg2 datagrid
-
-            //var province = $("#selectProvince").find("option:selected").text();
-            //var city = $("#selectCity").find("option:selected").text();
-            //var county = $("#selectCounty").find("option:selected").text();
-            //var region = province + "/" + city + "/" + county;
-            //if (province !== "全部" && city !== "全部" && county !== "全部") {
-            //    map.clearMap();
-            //    $("#dg2").datagrid({
-            //        url: `./API/SearchByRegionBuildings?text=${textSearch}&region=${region}`,
-            //        method: 'get',
-            //        onLoadSuccess: function (data) {
-            //                                    document.getElementsByClassName('datagrid-row')[10].click();
-
-            //        }
-            //    });
-            //} else if (province !== "全部" && city !== "全部" && county === "全部") {
-            //    map.clearMap();
-            //    $("#dg2").datagrid({
-            //        url: `./API/SearchByCityBuildings?text=${textSearch}&city=${city}`,
-            //        method: 'get',
-            //        onLoadSuccess: function (data) {
-            //                                    document.getElementsByClassName('datagrid-row')[10].click();
-
-            //        }
-            //    });
-            //}
-        }
-
-        function openPois(e) {
-            e.classList.remove("layui-btn-primary");
-            e.classList.add("layui-btn-normal");
-            e.innerHTML += `<i class="fa fa-check ml-3px"></i>`;
-            e.setAttribute("disabled", true);
-            var sibling = e.nextSibling;
-            sibling.classList.remove("layui-btn-normal");
-            sibling.classList.add("layui-btn-primary");
-            sibling.innerHTML = `否`;
-            sibling.removeAttribute("disabled");
-            var overlays = map.getAllOverlays("polygon");
-            overlays.forEach(function (overlay) {
-                overlay.show();
-            });
-        }
-
-        function closePois(e) {
-            e.classList.remove("layui-btn-primary");
-            e.classList.add("layui-btn-normal");
-            e.innerHTML += `<i class="fa fa-check ml-3px"></i>`;
-            e.setAttribute("disabled", true);
-            var sibling = e.previousSibling;
-            sibling.classList.remove("layui-btn-normal");
-            sibling.classList.add("layui-btn-primary");
-            sibling.innerHTML = `是`;
-            sibling.removeAttribute("disabled");
-            var overlays = map.getAllOverlays("polygon");
-            overlays.forEach(function (overlay) {
-                overlay.hide();
-            });
-        }
-
-        //dropdown
+        //下拉框
         var d = "";
         $.ajax({
             type: "get",
@@ -1530,14 +1551,14 @@
                         });
                         // get data for current city and display on map
                         var city = $("#selectCity").find("option:selected").text();
-                        
-                     
+
+
                         $("#dg").datagrid({
                             pageNumber: 1,
                             url: `./api/IndexByCity?city=${city}`,
                             method: 'get',
                             onLoadSuccess: function (data) {
-                              
+
                                 document.getElementsByClassName('datagrid-row')[0].click();
                             }
                         });
@@ -1557,7 +1578,7 @@
                             url: `./API/IndexByRegion?region=${region}`,
                             method: 'get',
                             onLoadSuccess: function (data) {
-                               
+
                                 document.getElementsByClassName('datagrid-row')[0].click();
                             }
                         });
@@ -1568,7 +1589,7 @@
                             url: `./api/IndexByCity?city=${city}`,
                             method: 'get',
                             onLoadSuccess: function (data) {
-                                
+
                                 document.getElementsByClassName('datagrid-row')[0].click();
                             }
                         });
@@ -1586,170 +1607,7 @@
             container.setAttribute("id", "buttonOpenClose");
             container.innerHTML += `<span class="bb-lightblue pb-5px mr-20">是否显示小区边界</span><button type="button" class="layui-btn layui-btn-radius layui-btn-normal layui-btn-sm" onclick="openPois(this);" disabled>是 <i class="fa fa-check ml-3px"></i></button><button type="button" class="layui-btn layui-btn-primary layui-btn-radius layui-btn-sm" onclick="closePois(this);">否</button>`;
             document.getElementsByClassName('panel')[1].appendChild(container);
-        }, 5000)
-
-                             //$.ajax({
-                        //    type: "get",
-                        //    url: `https://restapi.amap.com/v3/geocode/geo?key=c7aeb11746b35a92b7b6eee3178a05e4&address=${county}&city=`,
-                        //    contentType: "application/json; charset=utf-8",
-                        //    dataType: "json",
-                        //    success: function (data) {
-                        //        var lnglat = data["geocodes"][0]["location"];
-                        //        lng = Number(lnglat.split(",")[0]);
-                        //        lat = Number(lnglat.split(",")[1]);
-                        //        map.setCenter([lng, lat]);
-                        //        map.setZoom(17);
-
-                        //    },
-                        //    error: function () {
-                        //        console.log('error');
-                        //    }
-                        //});
-                        //$.ajax({
-                        //    type: "get",
-                        //    url: `./API/IndexByRegion?region=${region}`,
-                        //    contentType: "application/json; charset=utf-8",
-                        //    dataType: "json",
-                        //    success: function (data) {
-                        //        console.log(data);
-                        //        var xq = data[0]["ds"];
-                        //        var l = data[1]["ds"];
-                        //        var lFirst = data[2]["ds"];
-                        //        var rowsXQ = [];
-                        //        var rowsL = [];
-                        //        xq.forEach(function (XQ) {
-                        //            if (XQ["VILLAGE_BOUNDS"] !== "null") {
-                        //                var polygon = new AMap.Polygon({
-                        //                    strokeColor: "#2828FF",
-                        //                    fillOpacity: 0,
-                        //                    bubble: true,
-                        //                    strokeWeight: 1,
-                        //                    path: JSON.parse(XQ["VILLAGE_BOUNDS"]),
-                        //                    map: map
-                        //                });
-
-                        //                var polylineEditor = new AMap.PolyEditor(map, polygon);
-                        //                polygon.setExtData({ "editor": polylineEditor });
-
-
-                        //            }
-                        //            var hasBounds = "无";
-                        //            if (XQ["VILLAGE_BOUNDS"] !== null) {
-                        //                hasBounds = "有";
-                        //            }
-                        //            rowsXQ.push({ village_name: XQ["VILLAGE_NAME"], village_address: XQ["VILLAGE_ADDRESS"], village_region: XQ["VILLAGE_REGION"], village_type: XQ["VILLAGE_TYPE"], village_count: XQ["VILLAGE_COUNT"], village_hasBounds: hasBounds, village_action: `<i class="fa fa-eye mr-5" data-lng="${XQ["VILLAGE_LNG"]}" data-lat="${XQ["VILLAGE_LAT"]}" data-bounds="${XQ["VILLAGE_BOUNDS"]}" data-guid="${XQ["VILLAGE_ID"]}" onclick="getPoiDetail(this);"></i><i class="fa fa-edit mr-5" data-guid="${XQ["VILLAGE_ID"]}" onclick="editPoi(this);"></i><i class="fa fa-trash-o" data-guid="${XQ["VILLAGE_ID"]}" onclick="deletePoi(this);"></i>`, village_lng: XQ["VILLAGE_LNG"], village_lat: XQ["VILLAGE_LAT"] });
-
-                        //        });
-
-
-                        //        l.forEach(function (L) {
-                        //            var icon = new AMap.Icon({
-                        //                size: new AMap.Size(15, 15),
-                        //                image: './icons/circle.png',  // Icon的图像
-                        //                imageSize: new AMap.Size(15, 15)
-                        //            });
-                        //            var marker = new AMap.Marker({
-                        //                position: new AMap.LngLat(L["LNG"], L["LAT"]),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-                        //                title: L["BUILDING_NAME"],
-                        //                icon: icon // 添加 Icon 图标 URL
-                        //            });
-                        //            map.add(marker);
-
-
-                        //        });
-                        //        lFirst.forEach(function (L) {
-                        //            rowsL.push({ building_name: L["BUILDING_NAME"], building_address: L["BUILDING_ADDRESS"], building_action: `<i class=\"fa fa-eye mr-5 \" data-lng="${L["LNG"]}" data-lat="${L["LAT"]}" data-bounds="${L["BOUNDS"]}" data-guid="${L["BUILDING_ID"]}" onclick="getPoiDetail2(this);"></i><i class=\"fa fa-edit mr-5 \" data-guid="${L["BUILDING_ID"]}" onclick="editPoi2(this);"></i><i class=\"fa fa-trash-o \" data-guid="${L["BUILDING_ID"]}" onclick="deletePoi2(this);"></i>` });
-                        //        });
-                        //        $('#dg').datagrid('loadData', getData(rowsXQ));
-                        //        $('#dg2').datagrid('loadData', getData(rowsL));
-
-                        //    },
-                        //    error: function (item, err) {
-                        //        console.log(err);
-                        //    }
-                        //});
-                        //map.clearMap();
-                        //var city = $("#selectCity").find("option:selected").text();
-                        //$.ajax({
-                        //    type: "get",
-                        //    url: `https://restapi.amap.com/v3/geocode/geo?key=c7aeb11746b35a92b7b6eee3178a05e4&address=${city}&city=`,
-                        //    contentType: "application/json; charset=utf-8",
-                        //    dataType: "json",
-                        //    success: function (data) {
-                        //        var lnglat = data["geocodes"][0]["location"];
-                        //        lng = Number(lnglat.split(",")[0]);
-                        //        lat = Number(lnglat.split(",")[1]);
-                        //        map.setCenter([lng, lat]);
-                        //        map.setZoom(17);
-
-                        //    },
-                        //    error: function () {
-                        //        console.log('error');
-                        //    }
-                        //});
-                        //$.ajax({
-                        //    type: "get",
-                        //    url: `./api/IndexByCity?city=${city}`,
-                        //    contentType: "application/json; charset=utf-8",
-                        //    dataType: "json",
-                        //    success: function (data) {
-
-
-                        //        var xq = data[0]["ds"];
-                        //        var l = data[1]["ds"];
-                        //        var lFirst = data[2]["ds"];
-                        //        var rowsXQ = [];
-                        //        var rowsL = [];
-                        //        xq.forEach(function (XQ) {
-                        //            if (XQ["VILLAGE_BOUNDS"] !== "null") {
-                        //                var polygon = new AMap.Polygon({
-                        //                    strokeColor: "#2828FF",
-                        //                    fillOpacity: 0,
-                        //                    bubble: true,
-                        //                    strokeWeight: 1,
-                        //                    path: JSON.parse(XQ["VILLAGE_BOUNDS"]),
-                        //                    map: map
-                        //                });
-
-                        //                var polylineEditor = new AMap.PolyEditor(map, polygon);
-                        //                polygon.setExtData({ "editor": polylineEditor });
-
-
-                        //            }
-                        //            var hasBounds = "无";
-                        //            if (XQ["VILLAGE_BOUNDS"] !== null) {
-                        //                hasBounds = "有";
-                        //            }
-                        //            rowsXQ.push({ village_name: XQ["VILLAGE_NAME"], village_address: XQ["VILLAGE_ADDRESS"], village_region: XQ["VILLAGE_REGION"], village_type: XQ["VILLAGE_TYPE"], village_count: XQ["VILLAGE_COUNT"], village_hasBounds: hasBounds, village_action: `<i class="fa fa-eye mr-5" data-lng="${XQ["VILLAGE_LNG"]}" data-lat="${XQ["VILLAGE_LAT"]}" data-bounds="${XQ["VILLAGE_BOUNDS"]}" data-guid="${XQ["VILLAGE_ID"]}" onclick="getPoiDetail(this);"></i><i class="fa fa-edit mr-5" data-guid="${XQ["VILLAGE_ID"]}" onclick="editPoi(this);"></i><i class="fa fa-trash-o" data-guid="${XQ["VILLAGE_ID"]}" onclick="deletePoi(this);"></i>`, village_lng: XQ["VILLAGE_LNG"], village_lat: XQ["VILLAGE_LAT"] });
-
-                        //        });
-
-
-                        //        l.forEach(function (L) {
-                        //            var icon = new AMap.Icon({
-                        //                size: new AMap.Size(15, 15),
-                        //                image: './icons/circle.png',  // Icon的图像
-                        //                imageSize: new AMap.Size(15, 15)
-                        //            });
-                        //            var marker = new AMap.Marker({
-                        //                position: new AMap.LngLat(L["LNG"], L["LAT"]),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-                        //                title: L["BUILDING_NAME"],
-                        //                icon: icon // 添加 Icon 图标 URL
-                        //            });
-                        //            map.add(marker);
-
-
-                        //        });
-                        //        lFirst.forEach(function (L) {
-                        //            rowsL.push({ building_name: L["BUILDING_NAME"], building_address: L["BUILDING_ADDRESS"], building_action: `<i class=\"fa fa-eye mr-5 \" data-lng="${L["LNG"]}" data-lat="${L["LAT"]}" data-bounds="${L["BOUNDS"]}" data-guid="${L["BUILDING_ID"]}" onclick="getPoiDetail2(this);"></i><i class=\"fa fa-edit mr-5 \" data-guid="${L["BUILDING_ID"]}" onclick="editPoi2(this);"></i><i class=\"fa fa-trash-o \" data-guid="${L["BUILDING_ID"]}" onclick="deletePoi2(this);"></i>` });
-                        //        });
-                        //        $('#dg').datagrid('loadData', getData(rowsXQ));
-                        //        $('#dg2').datagrid('loadData', getData(rowsL));
-                        //    },
-                        //    error: function (item, err) {
-                        //        console.log(err);
-                        //    }
-                        //});
+        }, 5000);
     </script>
     <script type="text/javascript" src="~/easyui/locale/easyui-lang-zh_CN.js"></script>
 </body>
